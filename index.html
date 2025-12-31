@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Realisme Monitor — Hoeveel tijd kost het écht?</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='%2310b981' stroke-width='2'/%3E%3Cpath d='M16 8v8l5 3' stroke='%2310b981' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%2310b981'/%3E%3C/svg%3E">
+    <style>
+        :root {
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --white: #ffffff;
+            
+            --blue-50: #eff6ff;
+            --blue-100: #dbeafe;
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            
+            --orange-50: #fff7ed;
+            --orange-100: #ffedd5;
+            --orange-500: #f97316;
+            --orange-600: #ea580c;
+            
+            --red-50: #fef2f2;
+            --red-100: #fee2e2;
+            --red-400: #f87171;
+            --red-500: #ef4444;
+            --red-600: #dc2626;
+            
+            --amber-50: #fffbeb;
+            --amber-500: #f59e0b;
+            
+            --accent: #10b981;
+            --accent-light: #d1fae5;
+            --accent-dark: #0d9668;
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--slate-50);
+            color: var(--slate-700);
+            line-height: 1.5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid var(--slate-200);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .back-link {
+            position: absolute;
+            left: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--slate-400);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .logo svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .header-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--slate-800);
+            letter-spacing: -0.02em;
+        }
+
+        .header-text p {
+            font-size: 0.8125rem;
+            color: var(--slate-500);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Main grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        /* Card */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--slate-200);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Left column container */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card-input {
+            flex: 1;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--slate-400);
+            margin-bottom: 1rem;
+        }
+
+        /* Form */
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--slate-500);
+            margin-bottom: 0.375rem;
+        }
+
+        .input-group {
+            background: var(--slate-50);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .input-group-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--slate-600);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group-title .help {
+            cursor: help;
+            color: var(--slate-400);
+            border-bottom: 1px dashed var(--slate-400);
+            font-weight: 500;
+        }
+
+        .input-group-title .help:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .three-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .input-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-item label {
+            font-size: 0.6875rem;
+            font-weight: 500;
+            color: var(--slate-500);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-item input {
+            width: 100%;
+            padding: 0.625rem 0.5rem;
+            font-size: 1.125rem;
+            font-family: inherit;
+            font-weight: 600;
+            color: var(--slate-800);
+            background: var(--white);
+            border: 1.5px solid var(--slate-200);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-item input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .input-item.optimistic input { border-left: 3px solid var(--accent); }
+        .input-item.realistic input { border-left: 3px solid var(--blue-500); }
+        .input-item.pessimistic input { border-left: 3px solid var(--orange-500); }
+
+        /* Context selector */
+        .context-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .context-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--white);
+            border: 1.5px solid var(--slate-200);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .context-option:hover {
+            border-color: var(--slate-300);
+            background: var(--slate-50);
+        }
+
+        .context-option.selected {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .context-option input {
+            display: none;
+        }
+
+        .context-radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--slate-300);
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .context-option.selected .context-radio {
+            border-color: var(--accent);
+        }
+
+        .context-option.selected .context-radio::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .context-info {
+            flex: 1;
+        }
+
+        .context-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--slate-700);
+        }
+
+        .context-desc {
+            font-size: 0.75rem;
+            color: var(--slate-500);
+            margin-top: 0.125rem;
+        }
+
+        .context-badges {
+            display: flex;
+            gap: 0.375rem;
+            margin-left: auto;
+        }
+
+        .context-badge {
+            font-size: 0.625rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .context-badge.efficiency {
+            background: var(--blue-50);
+            color: var(--blue-600);
+        }
+
+        .context-badge.risk {
+            background: var(--orange-50);
+            color: var(--orange-600);
+        }
+
+        /* Button */
+        .btn {
+            padding: 0.875rem 1.25rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            font-family: inherit;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+        }
+
+        .btn-primary:disabled {
+            background: var(--slate-300);
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background: var(--white);
+            color: var(--slate-500);
+            border: 1.5px solid var(--slate-200);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--slate-300);
+            color: var(--slate-600);
+        }
+
+        /* Results area */
+        .results-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Result visualization */
+        .result-visual {
+            padding: 2rem;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-header h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--slate-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-header p {
+            font-size: 0.875rem;
+            color: var(--slate-500);
+        }
+
+        .bars-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bar-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+        }
+
+        .bar-label-text {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--slate-600);
+        }
+
+        .bar-label-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .bar-label-value.green { color: var(--accent); }
+        .bar-label-value.red { color: var(--red-500); }
+
+        .bar-label-unit {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--slate-500);
+            margin-left: 0.25rem;
+        }
+
+        .bar-track {
+            height: 40px;
+            background: var(--slate-100);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: var(--radius-sm);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+        }
+
+        .bar-fill.green {
+            background: linear-gradient(90deg, var(--accent-light), var(--accent));
+        }
+
+        .bar-fill.red {
+            background: linear-gradient(90deg, var(--red-100), var(--red-500));
+        }
+
+        .bar-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--white);
+            opacity: 0.9;
+        }
+
+        .bar-description {
+            font-size: 0.75rem;
+            color: var(--slate-500);
+            margin-top: 0.375rem;
+        }
+
+        /* Factor indicator */
+        .factor-indicator {
+            text-align: center;
+            padding: 1.25rem;
+            background: var(--red-50);
+            border-radius: var(--radius-md);
+            margin-top: 1rem;
+        }
+
+        .factor-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--red-500);
+        }
+
+        .factor-label {
+            font-size: 0.8125rem;
+            color: var(--slate-600);
+            margin-top: 0.25rem;
+        }
+
+        /* Diagnosis card */
+        .diagnosis-card {
+            background: var(--slate-50);
+            border: 1.5px solid var(--slate-200);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+        }
+
+        .diagnosis-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--slate-400);
+            margin-bottom: 0.625rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .diagnosis-title svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .diagnosis-text {
+            font-size: 0.9375rem;
+            color: var(--slate-700);
+            line-height: 1.6;
+        }
+
+        .diagnosis-text strong {
+            color: var(--slate-800);
+        }
+
+        /* Method info */
+        .method-card {
+            background: var(--white);
+            border: 1.5px solid var(--slate-200);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .method-card:hover {
+            border-color: var(--slate-300);
+        }
+
+        .method-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--slate-600);
+            background: none;
+            border: none;
+            font-family: inherit;
+            width: 100%;
+            text-align: left;
+            padding: 0;
+        }
+
+        .method-toggle:hover {
+            color: var(--accent);
+        }
+
+        .method-toggle svg {
+            width: 18px;
+            height: 18px;
+            color: var(--slate-400);
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .method-toggle:hover svg {
+            color: var(--accent);
+        }
+
+        .method-toggle.open svg {
+            transform: rotate(90deg);
+        }
+
+        .method-content {
+            display: none;
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--slate-100);
+        }
+
+        .method-content.show {
+            display: block;
+        }
+
+        .method-item {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            border-left: 2px solid var(--accent-light);
+        }
+
+        .method-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .method-item-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--slate-700);
+            margin-bottom: 0.25rem;
+        }
+
+        .method-item-text {
+            font-size: 0.8125rem;
+            color: var(--slate-500);
+            line-height: 1.6;
+        }
+
+        .method-content code {
+            background: var(--slate-100);
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--slate-700);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--slate-400);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--slate-500);
+            margin-bottom: 0.375rem;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 1rem;
+        }
+
+        .footer-quote {
+            font-size: 0.875rem;
+            color: var(--accent);
+            opacity: 0.9;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: fixed;
+            background: var(--slate-800);
+            color: var(--white);
+            padding: 0.625rem 0.875rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            max-width: 280px;
+            line-height: 1.5;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .back-link {
+                position: static;
+                margin-bottom: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .three-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .context-badges {
+                display: none;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="https://onderconstructie.github.io/projectmanagement/" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Projectmanagement
+        </a>
+        <div class="header-content">
+            <div class="logo">
+                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="16" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                    <path d="M20 10v10l6 3.5" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="20" cy="20" r="2.5" fill="#10b981"/>
+                    <circle cx="20" cy="6" r="1.5" fill="#10b981" opacity="0.5"/>
+                    <circle cx="34" cy="20" r="1.5" fill="#10b981" opacity="0.5"/>
+                    <circle cx="20" cy="34" r="1.5" fill="#10b981" opacity="0.5"/>
+                    <circle cx="6" cy="20" r="1.5" fill="#10b981" opacity="0.5"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <h1>Project Realisme Monitor</h1>
+                <p>Hoeveel tijd kost het écht?</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="main-grid">
+            <!-- Left column -->
+            <div class="left-column">
+                <div class="card card-input">
+                    <h2 class="card-title">Invoer</h2>
+                    
+                    <div class="input-section">
+                    <!-- PERT Estimation -->
+                    <div class="input-group">
+                        <div class="input-group-title">
+                            <span class="help" id="pertHelp">Drie-punten-schatting (PERT)</span>
+                        </div>
+                        <div class="three-inputs">
+                            <div class="input-item optimistic">
+                                <label>Optimistisch</label>
+                                <input type="number" id="optimistic" min="1" max="999" value="10" placeholder="O">
+                            </div>
+                            <div class="input-item realistic">
+                                <label>Realistisch</label>
+                                <input type="number" id="realistic" min="1" max="999" value="15" placeholder="M">
+                            </div>
+                            <div class="input-item pessimistic">
+                                <label>Pessimistisch</label>
+                                <input type="number" id="pessimistic" min="1" max="999" value="30" placeholder="P">
+                            </div>
+                        </div>
+                        <div style="font-size: 0.6875rem; color: var(--accent); font-weight: 500; margin-top: 0.5rem; text-align: center;">
+                            in mensdagen
+                        </div>
+                    </div>
+
+                    <!-- Context selector -->
+                    <div class="input-group">
+                        <div class="input-group-title">
+                            <span class="help" id="contextHelp">Organisatorische context</span>
+                        </div>
+                        <div class="context-options" id="contextOptions">
+                            <label class="context-option selected" data-context="autonomous">
+                                <input type="radio" name="context" value="autonomous" checked>
+                                <span class="context-radio"></span>
+                                <div class="context-info">
+                                    <div class="context-name">Autonoom</div>
+                                    <div class="context-desc">Focus op uitvoering, mandaat bij team</div>
+                                </div>
+                                <div class="context-badges">
+                                    <span class="context-badge efficiency">100%</span>
+                                    <span class="context-badge risk">P55</span>
+                                </div>
+                            </label>
+                            <label class="context-option" data-context="tactical">
+                                <input type="radio" name="context" value="tactical">
+                                <span class="context-radio"></span>
+                                <div class="context-info">
+                                    <div class="context-name">Tactisch</div>
+                                    <div class="context-desc">Afstemming met enkele ketenpartners</div>
+                                </div>
+                                <div class="context-badges">
+                                    <span class="context-badge efficiency">80%</span>
+                                    <span class="context-badge risk">P65</span>
+                                </div>
+                            </label>
+                            <label class="context-option" data-context="governance">
+                                <input type="radio" name="context" value="governance">
+                                <span class="context-radio"></span>
+                                <div class="context-info">
+                                    <div class="context-name">Bestuurlijk</div>
+                                    <div class="context-desc">Besluitvorming via stuurgroepen</div>
+                                </div>
+                                <div class="context-badges">
+                                    <span class="context-badge efficiency">60%</span>
+                                    <span class="context-badge risk">P80</span>
+                                </div>
+                            </label>
+                            <label class="context-option" data-context="political">
+                                <input type="radio" name="context" value="political">
+                                <span class="context-radio"></span>
+                                <div class="context-info">
+                                    <div class="context-name">Politiek</div>
+                                    <div class="context-desc">Complexe belangen, procedures domineren</div>
+                                </div>
+                                <div class="context-badges">
+                                    <span class="context-badge efficiency">40%</span>
+                                    <span class="context-badge risk">P85</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" id="calculateBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        Bereken doorlooptijd
+                    </button>
+
+                    <button class="btn btn-outline" id="resetBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                        Opnieuw beginnen
+                    </button>
+                </div>
+            </div>
+            </div>
+
+            <!-- Right: Results -->
+            <div class="results-area">
+                <div class="card result-visual" id="resultCard">
+                    <div class="empty-state" id="emptyState">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        <h3>Vul je schatting in</h3>
+                        <p>De tool berekent hoeveel kalendertijd je project<br>écht nodig heeft op basis van de context.</p>
+                    </div>
+
+                    <div id="resultsContent" style="display: none;">
+                        <div class="result-header">
+                            <h3 id="resultTitle">Resultaat</h3>
+                            <p id="resultSubtitle">Vergelijking werklast vs. doorlooptijd</p>
+                        </div>
+
+                        <div class="bars-container">
+                            <div class="bar-group">
+                                <div class="bar-label">
+                                    <span class="bar-label-text">Netto werklast (inspanning)</span>
+                                    <span><span class="bar-label-value green" id="effortValue">0</span><span class="bar-label-unit">mensdagen</span></span>
+                                </div>
+                                <div class="bar-track">
+                                    <div class="bar-fill green" id="effortBar" style="width: 0%">
+                                        <svg class="bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+                                            <circle cx="9" cy="7" r="4"/>
+                                            <path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="bar-description">Netto werktijd nodig om het project af te ronden</div>
+                            </div>
+
+                            <div class="bar-group">
+                                <div class="bar-label">
+                                    <span class="bar-label-text">Doorlooptijd (kalender)</span>
+                                    <span><span class="bar-label-value red" id="durationValue">0</span><span class="bar-label-unit">werkdagen</span></span>
+                                </div>
+                                <div class="bar-track">
+                                    <div class="bar-fill red" id="durationBar" style="width: 0%">
+                                        <svg class="bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                            <line x1="16" y1="2" x2="16" y2="6"/>
+                                            <line x1="8" y1="2" x2="8" y2="6"/>
+                                            <line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="bar-description">Bruto kalendertijd inclusief wachttijd en afstemming</div>
+                            </div>
+
+                            <div class="factor-indicator" id="factorIndicator">
+                                <div class="factor-value" id="factorValue">1.0×</div>
+                                <div class="factor-label">factor tussen werklast en doorlooptijd</div>
+                            </div>
+                        </div>
+
+                        <div class="diagnosis-card" style="margin-top: 1.5rem;">
+                            <div class="diagnosis-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="16" x2="12" y2="12"/>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                </svg>
+                                Diagnose
+                            </div>
+                            <p class="diagnosis-text" id="diagnosisText"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Method explanation -->
+                <div class="card method-card">
+                    <button class="method-toggle" id="methodToggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                        Hoe werkt deze tool?
+                    </button>
+                    <div class="method-content" id="methodContent">
+                        <div class="method-item">
+                            <div class="method-item-title">Doel</div>
+                            <div class="method-item-text">Deze tool helpt de Planning Fallacy te mitigeren door onzekerheid expliciet te maken en organisatorische frictie mee te rekenen.</div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-title">PERT-methode</div>
+                            <div class="method-item-text">De drie-punten-schatting volgt de Program Evaluation and Review Technique. Gemiddelde: <code>μ = (O + 4M + P) / 6</code> en standaardafwijking: <code>σ = (P - O) / 6</code></div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-title">Monte Carlo simulatie</div>
+                            <div class="method-item-text">De tool draait 2000 simulaties met een normale verdeling. Afhankelijk van de context wordt een percentiel gekozen: P55 voor autonome teams (lichte correctie voor optimisme-bias), tot P85 voor politieke contexten.</div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-title">Efficiency Factor</div>
+                            <div class="method-item-text">De kalendertijd wordt berekend door de werklast te delen door efficiency (40%-100%). Dit modelleert wachttijd, afstemming en besluitvorming.</div>
+                        </div>
+                        <div class="method-item">
+                            <div class="method-item-title">Privacy</div>
+                            <div class="method-item-text">Alle berekeningen vinden plaats in je browser. Er wordt geen data verzonden.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <span class="footer-quote">De klap die je ziet aankomen, breekt je niet.</span>
+    </footer>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Configuration per context
+        const CONTEXTS = {
+            autonomous: { efficiency: 1.00, percentile: 0.55, name: 'Autonoom', risk: 'P55' },
+            tactical:   { efficiency: 0.80, percentile: 0.65, name: 'Tactisch', risk: 'P65' },
+            governance: { efficiency: 0.60, percentile: 0.80, name: 'Bestuurlijk', risk: 'P80' },
+            political:  { efficiency: 0.40, percentile: 0.85, name: 'Politiek', risk: 'P85' }
+        };
+
+        const SIMULATIONS = 2000;
+
+        // Box-Muller transform for normal distribution
+        function normalRandom(mean, stdDev) {
+            let u1 = Math.random();
+            let u2 = Math.random();
+            while (u1 === 0) u1 = Math.random();
+            const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            return mean + z * stdDev;
+        }
+
+        // Monte Carlo simulation
+        function runSimulation(optimistic, realistic, pessimistic, context) {
+            // PERT calculations
+            const mean = (optimistic + 4 * realistic + pessimistic) / 6;
+            const stdDev = (pessimistic - optimistic) / 6;
+
+            // Run simulations
+            const results = [];
+            for (let i = 0; i < SIMULATIONS; i++) {
+                let value = normalRandom(mean, stdDev);
+                // Floor: can't be less than optimistic estimate
+                value = Math.max(value, optimistic);
+                results.push(value);
+            }
+
+            // Sort for percentile extraction
+            results.sort((a, b) => a - b);
+
+            // Extract effort at chosen percentile
+            const config = CONTEXTS[context];
+            const index = Math.floor(config.percentile * SIMULATIONS);
+            const effort = results[Math.min(index, SIMULATIONS - 1)];
+
+            // Calculate calendar duration
+            const duration = effort / config.efficiency;
+
+            return {
+                effort: Math.round(effort * 10) / 10,
+                duration: Math.round(duration * 10) / 10,
+                factor: Math.round((duration / effort) * 10) / 10,
+                context: config,
+                mean: Math.round(mean * 10) / 10,
+                stdDev: Math.round(stdDev * 10) / 10
+            };
+        }
+
+        // Generate diagnosis text
+        function getDiagnosis(result, context) {
+            const config = CONTEXTS[context];
+            const factorText = result.factor > 1 ? `factor ${result.factor}×` : 'gelijk aan';
+            
+            const diagnoses = {
+                autonomous: `Je planning is gebaseerd op een licht gecorrigeerd scenario (${config.risk}) dat rekening houdt met onvoorziene tegenvallers. In een autonome context loopt de doorlooptijd synchroon met de werklast. Dit past bij teams met volledig mandaat en minimale externe afhankelijkheden.`,
+                
+                tactical: `De tool rekent met een gemiddelde onzekerheidsmarge (${config.risk}). Door afstemming met ketenpartners is circa 20% van de tijd 'niet-productief'. Je doorlooptijd is ${factorText} langer dan de netto werklast.`,
+                
+                governance: `Let op: Door besluitvorming via stuurgroepen en managementlagen hanteert de tool een veilige marge (${config.risk}). De efficiency van 60% betekent dat 40% van de kalendertijd opgaat aan wachten en afstemmen. Plan je oplevermomenten ruim.`,
+                
+                political: `Waarschuwing: In een politieke context is budgetoverschrijding dodelijk voor het vertrouwen. De tool hanteert daarom de hoogste zekerheidsmarge (${config.risk}). Met slechts 40% effectieve productietijd is je doorlooptijd ${factorText} langer dan de werklast. Communiceer actief over deze realiteit naar stakeholders.`
+            };
+            
+            return diagnoses[context];
+        }
+
+        // Animate bars
+        function animateBars(effort, duration) {
+            const maxValue = Math.max(effort, duration);
+            const effortPercent = (effort / maxValue) * 100;
+            const durationPercent = (duration / maxValue) * 100;
+
+            document.getElementById('effortValue').textContent = effort;
+            document.getElementById('durationValue').textContent = duration;
+            
+            setTimeout(() => {
+                document.getElementById('effortBar').style.width = effortPercent + '%';
+                document.getElementById('durationBar').style.width = durationPercent + '%';
+            }, 100);
+        }
+
+        // Main calculation
+        function calculate() {
+            const O = parseFloat(document.getElementById('optimistic').value) || 0;
+            const M = parseFloat(document.getElementById('realistic').value) || 0;
+            const P = parseFloat(document.getElementById('pessimistic').value) || 0;
+            const context = document.querySelector('input[name="context"]:checked').value;
+
+            // Validation
+            if (O <= 0 || M <= 0 || P <= 0) {
+                showError('Vul alle drie de schattingen in (groter dan 0).');
+                return;
+            }
+            if (O >= M || M >= P) {
+                showError('De volgorde moet zijn: Optimistisch < Realistisch < Pessimistisch');
+                return;
+            }
+
+            // Run simulation
+            const result = runSimulation(O, M, P, context);
+
+            // Show results
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsContent').style.display = 'block';
+
+            document.getElementById('resultTitle').textContent = 'Resultaat';
+            document.getElementById('resultSubtitle').textContent = `Context: ${result.context.name} · ${result.context.risk} zekerheid`;
+
+            animateBars(result.effort, result.duration);
+            
+            document.getElementById('factorValue').textContent = result.factor + '×';
+            document.getElementById('diagnosisText').textContent = getDiagnosis(result, context);
+
+            // Visual feedback on button
+            const btn = document.getElementById('calculateBtn');
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Berekend`;
+            setTimeout(() => {
+                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Bereken doorlooptijd`;
+            }, 1500);
+        }
+
+        function showError(message) {
+            const tooltip = document.getElementById('tooltip');
+            const btn = document.getElementById('calculateBtn');
+            const rect = btn.getBoundingClientRect();
+            
+            tooltip.textContent = message;
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.bottom + 10) + 'px';
+            tooltip.classList.add('show');
+            
+            setTimeout(() => tooltip.classList.remove('show'), 3000);
+        }
+
+        function reset() {
+            document.getElementById('optimistic').value = '10';
+            document.getElementById('realistic').value = '15';
+            document.getElementById('pessimistic').value = '30';
+            
+            document.querySelectorAll('.context-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector('.context-option[data-context="autonomous"]').classList.add('selected');
+            document.querySelector('input[name="context"][value="autonomous"]').checked = true;
+            
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('resultsContent').style.display = 'none';
+            document.getElementById('effortBar').style.width = '0%';
+            document.getElementById('durationBar').style.width = '0%';
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('calculateBtn').addEventListener('click', calculate);
+            document.getElementById('resetBtn').addEventListener('click', reset);
+
+            // Context selection
+            document.querySelectorAll('.context-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.context-option').forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                });
+            });
+
+            // Method toggle
+            document.getElementById('methodToggle').addEventListener('click', () => {
+                const toggle = document.getElementById('methodToggle');
+                const content = document.getElementById('methodContent');
+                toggle.classList.toggle('open');
+                content.classList.toggle('show');
+            });
+
+            // Tooltips
+            const tooltip = document.getElementById('tooltip');
+
+            function showTooltip(element, text) {
+                tooltip.textContent = text;
+                const rect = element.getBoundingClientRect();
+                tooltip.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+                tooltip.style.top = (rect.bottom + 10) + 'px';
+                tooltip.classList.add('show');
+            }
+
+            function hideTooltip() {
+                tooltip.classList.remove('show');
+            }
+
+            document.getElementById('pertHelp').addEventListener('mouseenter', e => {
+                showTooltip(e.target, 'PERT: Program Evaluation and Review Technique. Schat drie scenario\'s: best-case (Optimistisch), meest waarschijnlijk (Realistisch), en worst-case (Pessimistisch). De tool simuleert duizenden uitkomsten om een realistische verwachting te berekenen.');
+            });
+            document.getElementById('pertHelp').addEventListener('mouseleave', hideTooltip);
+
+            document.getElementById('contextHelp').addEventListener('mouseenter', e => {
+                showTooltip(e.target, 'De organisatorische context bepaalt twee dingen: (1) hoeveel van je tijd daadwerkelijk productief is (efficiency), en (2) hoeveel zekerheidsmarge de tool hanteert (risicoprofiel). Hoe politieker de context, hoe meer buffer wordt ingebouwd.');
+            });
+            document.getElementById('contextHelp').addEventListener('mouseleave', hideTooltip);
+
+            // Enter key to calculate
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('keypress', e => {
+                    if (e.key === 'Enter') calculate();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

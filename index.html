@@ -786,19 +786,54 @@
             font-style: normal;
             margin: 0;
         }
+    
+        /* ===== Huisstijl oktober 2026: kop (patroon B), contrast, focus, tikdoelen ===== */
+        .oc-head { display:block; text-align:center; background:#fff; border-bottom:1px solid #e2e8f0; padding:1.5rem 1.25rem 1.75rem; position:relative; }
+        .oc-head .back-link { position:absolute; top:0.875rem; left:1rem; min-height:44px; display:inline-flex; align-items:center; gap:0.5rem; padding:0 0.5rem; margin:0; font-size:0.875rem; color:#64748b; text-decoration:none; border-radius:8px; transition:color 0.2s; }
+        .oc-head .back-link:hover { color:#047857; }
+        .oc-head .back-link svg { width:16px; height:16px; flex:none; }
+        .oc-head .logo { display:block; width:56px; height:56px; margin:0 auto; }
+        .oc-head .logo svg { display:block; width:56px; height:56px; }
+        .oc-head .title { font-size:1.625rem; font-weight:700; color:#1e293b; letter-spacing:-0.03em; line-height:1.2; margin:0.5rem 0 0.25rem; }
+        .oc-head .subtitle { font-size:0.9375rem; color:#64748b; max-width:520px; margin:0 auto; }
+        @media (max-width:640px) {
+            .oc-head { padding-top:0.5rem; }
+            .oc-head .back-link { position:static; margin:0 auto 0.375rem; }
+        }
+        footer.oc-footer, footer.oc-footer .oc-quote, .footer .quote { color:#047857; }
+        :focus-visible { outline:2px solid #047857 !important; outline-offset:2px; }
+        input[type=range]:focus-visible { outline:2px solid #047857 !important; outline-offset:4px; }
+        .oc-import { color:#047857; min-height:44px; }
+        .oc-import:focus-visible { outline-color:#047857; }
+        .sr-only { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+        .card-title, .input-group-title .help, .empty-state, .diagnosis-title, .method-toggle svg { color:#64748b; }
+        .input-group-title .help { border-bottom-color:#94a3b8; cursor:help; display:inline-flex; align-items:center; min-height:44px; margin:-12px 0; }
+        .input-group-title .help:hover, .input-group-title .help:focus-visible { color:#047857; border-bottom-color:#047857; }
+        .context-option input { display:block; position:absolute; opacity:0; width:1px; height:1px; pointer-events:none; }
+        .context-option { position:relative; }
+        .context-option:focus-within { outline:2px solid #047857; outline-offset:2px; }
+        .context-desc { color:#475569; }
+        .context-badge.efficiency { color:#1e40af; }
+        .context-badge.risk { color:#9a3412; }
+        .bar-label-value.green { color:#047857; }
+        .bar-label-value.red { color:#b91c1c; }
+        .btn { min-height:44px; }
+        .btn-primary { background:#047857; color:#fff; border-radius:10px; font-size:15px; padding:0 1.25rem; }
+        .btn-primary:hover:not(:disabled) { background:#065f46; }
+        .method-toggle { min-height:44px; margin:-0.75rem 0; }
+        .method-toggle:hover, .method-toggle:hover svg { color:#047857; }
+        .input-item input::placeholder { color:#64748b; }
     </style>
 </head>
 <body>
-    <header class="header">
-        <a href="https://onderconstructie.github.io/projectmanagement/" class="back-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
+    <header class="header oc-head">
+        <a href="https://onderconstructie.github.io/projectmanagement/" class="back-link" aria-label="Terug naar Projectmanagement">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Projectmanagement
         </a>
-        <div class="header-content">
-            <div class="logo">
-                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div class="logo" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="20" cy="20" r="16" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
                     <path d="M20 10v10l6 3.5" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
                     <circle cx="20" cy="20" r="2.5" fill="#10b981"/>
@@ -807,12 +842,9 @@
                     <circle cx="20" cy="34" r="1.5" fill="#10b981" opacity="0.5"/>
                     <circle cx="6" cy="20" r="1.5" fill="#10b981" opacity="0.5"/>
                 </svg>
-            </div>
-            <div class="header-text">
-                <h1>Project Realisme Monitor</h1>
-                <p>Hoeveel tijd kost het écht?</p>
-            </div>
         </div>
+        <h1 class="title">Project Realisme Monitor</h1>
+        <p class="subtitle">Hoeveel tijd kost het écht?</p>
     </header>
 
     <div class="container">
@@ -827,23 +859,23 @@
                     <!-- PERT Estimation -->
                     <div class="input-group">
                         <div class="input-group-title">
-                            <span class="help" id="pertHelp">Drie-punten-schatting (PERT)</span>
+                            <span class="help" id="pertHelp" tabindex="0" role="button">Drie-punten-schatting (PERT)</span>
                         </div>
                         <div class="three-inputs">
                             <div class="input-item optimistic">
-                                <label>Optimistisch</label>
+                                <label for="optimistic">Optimistisch</label>
                                 <input type="number" id="optimistic" min="1" max="999" value="10" placeholder="O">
                             </div>
                             <div class="input-item realistic">
-                                <label>Realistisch</label>
+                                <label for="realistic">Realistisch</label>
                                 <input type="number" id="realistic" min="1" max="999" value="15" placeholder="M">
                             </div>
                             <div class="input-item pessimistic">
-                                <label>Pessimistisch</label>
+                                <label for="pessimistic">Pessimistisch</label>
                                 <input type="number" id="pessimistic" min="1" max="999" value="30" placeholder="P">
                             </div>
                         </div>
-                        <div style="font-size: 0.6875rem; color: var(--accent); font-weight: 500; margin-top: 0.5rem; text-align: center;">
+                        <div style="font-size: 0.6875rem; color: #047857; font-weight: 500; margin-top: 0.5rem; text-align: center;">
                             in mensdagen
                         </div>
                     </div>
@@ -851,7 +883,7 @@
                     <!-- Context selector -->
                     <div class="input-group">
                         <div class="input-group-title">
-                            <span class="help" id="contextHelp">Organisatorische context</span>
+                            <span class="help" id="contextHelp" tabindex="0" role="button">Organisatorische context</span>
                         </div>
                         <div class="context-options" id="contextOptions">
                             <label class="context-option selected" data-context="autonomous">
@@ -1011,7 +1043,7 @@
 
                 <!-- Method explanation -->
                 <div class="card method-card">
-                    <button class="method-toggle" id="methodToggle">
+                    <button class="method-toggle" id="methodToggle" type="button" aria-expanded="false" aria-controls="methodContent">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="9 18 15 12 9 6"/>
                         </svg>
@@ -1020,19 +1052,19 @@
                     <div class="method-content" id="methodContent">
                         <div class="method-item">
                             <div class="method-item-title">Doel</div>
-                            <div class="method-item-text">Deze tool helpt de Planning Fallacy te mitigeren door onzekerheid expliciet te maken en organisatorische frictie mee te rekenen.</div>
+                            <div class="method-item-text">Deze tool helpt je de neiging om te optimistisch te plannen in te perken: hij maakt de onzekerheid zichtbaar en rekent de wrijving in een organisatie mee.</div>
                         </div>
                         <div class="method-item">
                             <div class="method-item-title">PERT-methode</div>
-                            <div class="method-item-text">De drie-punten-schatting volgt de Program Evaluation and Review Technique. Gemiddelde: <code>μ = (O + 4M + P) / 6</code> en standaardafwijking: <code>σ = (P - O) / 6</code></div>
+                            <div class="method-item-text">De drie-punten-schatting volgt de PERT-methode. Gemiddelde: <code>μ = (O + 4M + P) / 6</code> en standaardafwijking: <code>σ = (P - O) / 6</code></div>
                         </div>
                         <div class="method-item">
-                            <div class="method-item-title">Monte Carlo simulatie</div>
-                            <div class="method-item-text">De tool draait 2000 simulaties met een normale verdeling. Afhankelijk van de context wordt een percentiel gekozen: P55 voor autonome teams (lichte correctie voor optimisme-bias), tot P85 voor politieke contexten.</div>
+                            <div class="method-item-title">Monte Carlo-simulatie</div>
+                            <div class="method-item-text">De tool draait 2000 simulaties met een normale verdeling. Afhankelijk van de context wordt een percentiel gekozen: P55 voor autonome teams (een lichte correctie voor te veel optimisme), tot P85 voor politieke contexten.</div>
                         </div>
                         <div class="method-item">
-                            <div class="method-item-title">Efficiency Factor</div>
-                            <div class="method-item-text">De kalendertijd wordt berekend door de werklast te delen door efficiency (40%-100%). Dit modelleert wachttijd, afstemming en besluitvorming.</div>
+                            <div class="method-item-title">Efficiëntiefactor</div>
+                            <div class="method-item-text">De kalendertijd wordt berekend door de werklast te delen door de efficiëntie (40% tot 100%). Dit modelleert wachttijd, afstemming en besluitvorming.</div>
                         </div>
                         <div class="method-item">
                             <div class="method-item-title">Privacy</div>
@@ -1048,7 +1080,7 @@
         <p class="quote oc-quote">De klap die je ziet aankomen, breekt je niet.</p>
     </footer>
 
-    <div class="tooltip" id="tooltip"></div>
+    <div class="tooltip" id="tooltip" role="tooltip"></div>
     <div class="oc-toast" id="ocToast" role="status" aria-live="polite"></div>
 
     <script>
@@ -1216,7 +1248,7 @@ const ocExport = (() => {
                 
                 tactical: `De tool rekent met een gemiddelde onzekerheidsmarge (${config.risk}). Door afstemming met ketenpartners is circa 20% van de tijd 'niet-productief'. Je doorlooptijd is ${factorText} langer dan de netto werklast.`,
                 
-                governance: `Let op: Door besluitvorming via stuurgroepen en managementlagen hanteert de tool een veilige marge (${config.risk}). De efficiency van 60% betekent dat 40% van de kalendertijd opgaat aan wachten en afstemmen. Plan je oplevermomenten ruim.`,
+                governance: `Let op: Door besluitvorming via stuurgroepen en managementlagen hanteert de tool een veilige marge (${config.risk}). De efficiëntie van 60% betekent dat 40% van de kalendertijd opgaat aan wachten en afstemmen. Plan je oplevermomenten ruim.`,
                 
                 political: `Waarschuwing: In een politieke context is budgetoverschrijding dodelijk voor het vertrouwen. De tool hanteert daarom de hoogste zekerheidsmarge (${config.risk}). Met slechts 40% effectieve productietijd is je doorlooptijd ${factorText} langer dan de werklast. Communiceer actief over deze realiteit naar stakeholders.`
             };
@@ -1248,8 +1280,8 @@ const ocExport = (() => {
                     <span><span style="font-size:24px;font-weight:700;color:${color}">${fmt(value)}</span> <span style="font-size:13px;color:#64748b">${unit}</span></span>
                 </div>
                 <div style="height:18px;background:#f1f5f9;border-radius:9px;overflow:hidden"><div style="height:100%;width:${(value / max * 100).toFixed(1)}%;background:${color};border-radius:9px"></div></div>
-                <div style="font-size:12px;color:#94a3b8;margin-top:5px">${desc}</div></div>`;
-            const section = t => `<div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;margin:4px 0 10px">${t}</div>`;
+                <div style="font-size:12px;color:#64748b;margin-top:5px">${desc}</div></div>`;
+            const section = t => `<div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;margin:4px 0 10px">${t}</div>`;
             node.innerHTML = `
                 <div data-oc-keep>
                     ${section('Invoer: drie-punten-schatting (PERT)')}
@@ -1264,8 +1296,8 @@ const ocExport = (() => {
                 </div>
                 <div data-oc-keep>
                     ${section('Resultaat')}
-                    ${bar('Netto werklast (inspanning)', result.effort, 'mensdagen', '#10b981', 'Netto werktijd nodig om het project af te ronden')}
-                    ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#ef4444', 'Bruto kalendertijd inclusief wachttijd en afstemming')}
+                    ${bar('Netto werklast (inspanning)', result.effort, 'mensdagen', '#047857', 'Netto werktijd nodig om het project af te ronden')}
+                    ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#b91c1c', 'Bruto kalendertijd inclusief wachttijd en afstemming')}
                     <div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:10px;padding:12px 16px;margin:6px 0 22px">
                         <span style="font-size:26px;font-weight:700;color:#1e293b">${fmt(result.factor)}×</span>
                         <span style="font-size:13px;color:#64748b">factor tussen werklast en doorlooptijd</span>
@@ -1354,7 +1386,9 @@ const ocExport = (() => {
             const rect = btn.getBoundingClientRect();
             
             tooltip.textContent = message;
-            tooltip.style.left = rect.left + 'px';
+            tooltip.style.maxWidth = Math.min(300, innerWidth - 16) + 'px';
+            tooltip.style.left = '0px';
+            tooltip.style.left = Math.max(8, Math.min(rect.left, innerWidth - tooltip.offsetWidth - 8)) + 'px';
             tooltip.style.top = (rect.bottom + 10) + 'px';
             tooltip.classList.add('show');
             
@@ -1391,6 +1425,10 @@ const ocExport = (() => {
                     option.classList.add('selected');
                 });
             });
+            // ook met de pijltjestoetsen kiezen
+            document.querySelectorAll('input[name="context"]').forEach(r => r.addEventListener('change', () => {
+                document.querySelectorAll('.context-option').forEach(o => o.classList.toggle('selected', o.contains(r) && r.checked));
+            }));
 
             // Method toggle
             document.getElementById('methodToggle').addEventListener('click', () => {
@@ -1398,6 +1436,7 @@ const ocExport = (() => {
                 const content = document.getElementById('methodContent');
                 toggle.classList.toggle('open');
                 content.classList.toggle('show');
+                toggle.setAttribute('aria-expanded', content.classList.contains('show'));
             });
 
             // Tooltips
@@ -1406,7 +1445,9 @@ const ocExport = (() => {
             function showTooltip(element, text) {
                 tooltip.textContent = text;
                 const rect = element.getBoundingClientRect();
-                tooltip.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+                tooltip.style.maxWidth = Math.min(300, innerWidth - 16) + 'px';
+                tooltip.style.left = '0px';
+                tooltip.style.left = Math.max(8, Math.min(rect.left, innerWidth - tooltip.offsetWidth - 8)) + 'px';
                 tooltip.style.top = (rect.bottom + 10) + 'px';
                 tooltip.classList.add('show');
             }
@@ -1416,14 +1457,23 @@ const ocExport = (() => {
             }
 
             document.getElementById('pertHelp').addEventListener('mouseenter', e => {
-                showTooltip(e.target, 'PERT: Program Evaluation and Review Technique. Schat drie scenario\'s: best-case (Optimistisch), meest waarschijnlijk (Realistisch), en worst-case (Pessimistisch). De tool simuleert duizenden uitkomsten om een realistische verwachting te berekenen.');
+                showTooltip(e.target, 'PERT is een methode om met onzekerheid te schatten. Schat drie scenario\'s: het beste geval (optimistisch), het meest waarschijnlijke (realistisch) en het slechtste geval (pessimistisch). De tool simuleert duizenden uitkomsten om een realistische verwachting te berekenen.');
             });
             document.getElementById('pertHelp').addEventListener('mouseleave', hideTooltip);
 
             document.getElementById('contextHelp').addEventListener('mouseenter', e => {
-                showTooltip(e.target, 'De organisatorische context bepaalt twee dingen: (1) hoeveel van je tijd daadwerkelijk productief is (efficiency), en (2) hoeveel zekerheidsmarge de tool hanteert (risicoprofiel). Hoe politieker de context, hoe meer buffer wordt ingebouwd.');
+                showTooltip(e.target, 'De organisatorische context bepaalt twee dingen: (1) hoeveel van je tijd echt productief is (efficiëntie), en (2) hoeveel zekerheidsmarge de tool hanteert (risicoprofiel). Hoe politieker de context, hoe meer buffer wordt ingebouwd.');
             });
             document.getElementById('contextHelp').addEventListener('mouseleave', hideTooltip);
+            // uitleg ook bij focus en tikken
+            ['pertHelp', 'contextHelp'].forEach(id => {
+                const el = document.getElementById(id);
+                const show = () => el.dispatchEvent(new MouseEvent('mouseenter'));
+                el.addEventListener('focus', show);
+                el.addEventListener('click', show);
+                el.addEventListener('blur', hideTooltip);
+                el.addEventListener('keydown', e => { if (e.key === 'Escape') hideTooltip(); });
+            });
 
             // Enter key to calculate
             document.querySelectorAll('input[type="number"]').forEach(input => {

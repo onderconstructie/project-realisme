@@ -849,6 +849,8 @@
         .vb-wis { color:#b91c1c; border-color:#fecaca; } .vb-wis:hover { background:#fef2f2; }
         .vb-eigen { color:#047857; border-color:#a7f3d0; } .vb-eigen:hover { background:#ecfdf5; }
         .input-item input { min-height:44px; font-variant-numeric:tabular-nums; }
+        input, button, select, textarea { font-family:inherit; }
+        .method-item-text code { font-family:inherit; font-variant-numeric:tabular-nums; font-weight:600; }
         .context-meta { font-size:0.75rem; font-weight:600; color:#334155; margin-top:0.25rem; font-variant-numeric:tabular-nums; }
     </style>
 </head>
@@ -1305,7 +1307,7 @@ const ocExport = (() => {
                 <div data-oc-keep>
                     ${section('Resultaat')}
                     ${bar('Netto werklast (inspanning)', result.effort, 'mensdagen', '#047857', 'Netto werktijd nodig om het project af te ronden')}
-                    ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#334155', 'Groen: werk · gearceerd: wachten en afstemmen', durBg(result.effort, result.duration))}
+                    ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#334155', 'Groen: werk · grijs: wachten en afstemmen', `linear-gradient(90deg, #10b981 0 ${(result.effort / result.duration * 100).toFixed(1)}%, #cbd5e1 ${(result.effort / result.duration * 100).toFixed(1)}%)`)}
                     <div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:10px;padding:12px 16px;margin:6px 0 22px">
                         <span style="font-size:26px;font-weight:700;color:#1e293b">${fmt(result.factor)}×</span>
                         <span style="font-size:13px;color:#64748b">factor tussen werklast en doorlooptijd · start je vandaag, dan ben je klaar rond ${escHtml(endDate(result.duration))}</span>

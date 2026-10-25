@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#ffffff">
     <title>Project Realisme Monitor – Onder Constructie</title>
-    <meta name="description" content="Bereken realistische doorlooptijd met Monte Carlo simulatie. Ontkoppel inspanning van kalendertijd.">
+    <meta name="description" content="Schat in hoe lang een project echt duurt: van drie schattingen naar een veilige werklast en een doorlooptijd die wachten en afstemmen meetelt.">
     <meta name="oc:groep" content="projecten">
     <meta name="oc:labels" content="">
     <meta name="oc:pdca" content="plan">
@@ -13,7 +13,7 @@
     <meta name="oc:volgorde" content="90">
     <meta name="oc:traject" content="project:4">
 <link rel="stylesheet" href="/fonts/fonts.css">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=&quot;0 0 40 40&quot; fill=&quot;none&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E %3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;16&quot; fill=&quot;%23ecfdf5&quot; stroke=&quot;%2310b981&quot; stroke-width=&quot;1.5&quot;/%3E %3Cpath d=&quot;M20 10v10l6 3.5&quot; stroke=&quot;%2310b981&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot;/%3E %3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;2.5&quot; fill=&quot;%2310b981&quot;/%3E %3Ccircle cx=&quot;20&quot; cy=&quot;6&quot; r=&quot;1.5&quot; fill=&quot;%2310b981&quot; opacity=&quot;0.5&quot;/%3E %3Ccircle cx=&quot;34&quot; cy=&quot;20&quot; r=&quot;1.5&quot; fill=&quot;%2310b981&quot; opacity=&quot;0.5&quot;/%3E %3Ccircle cx=&quot;6&quot; cy=&quot;20&quot; r=&quot;1.5&quot; fill=&quot;%2310b981&quot; opacity=&quot;0.5&quot;/%3E %3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=&quot;0 0 40 40&quot; fill=&quot;none&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;18&quot; fill=&quot;%23f8fafc&quot; stroke=&quot;%23e2e8f0&quot; stroke-width=&quot;1.5&quot;/%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;10&quot; stroke=&quot;%23334155&quot; stroke-width=&quot;1.6&quot; fill=&quot;%23fff&quot;/%3E%3Cpath d=&quot;M20 10A10 10 0 0 1 29.5 23.1&quot; stroke=&quot;%2310b981&quot; stroke-width=&quot;3&quot; fill=&quot;none&quot; stroke-linecap=&quot;round&quot;/%3E%3Cpath d=&quot;M20 14v6l3.5 2.2&quot; stroke=&quot;%23334155&quot; stroke-width=&quot;1.8&quot; fill=&quot;none&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;1.3&quot; fill=&quot;%23334155&quot;/%3E%3C/svg%3E">
     <style>
         :root {
             --slate-50: #f8fafc;
@@ -822,6 +822,34 @@
         .method-toggle { min-height:44px; margin:-0.75rem 0; }
         .method-toggle:hover, .method-toggle:hover svg { color:#047857; }
         .input-item input::placeholder { color:#64748b; }
+        /* Huisstijl: neutrale kleuren, voorbeeldbalk, gearceerde wachttijd */
+        .input-item.realistic input { border-left-color:#334155; }
+        .input-item.pessimistic input { border-left-color:#d97706; }
+        .context-badge.efficiency, .context-badge.risk { background:#f1f5f9; color:#334155; font-variant-numeric:tabular-nums; }
+        .bar-label-value { font-variant-numeric:tabular-nums; }
+        .bar-label-value.dur { color:#334155; }
+        .bar-fill.dur { background:#334155; }
+        .bar-fill.dur .bar-icon { color:#334155; }
+        .key { display:inline-block; width:12px; height:10px; border-radius:3px; vertical-align:-1px; margin:0 0.3rem 0 0; }
+        .key-werk { background:#10b981; }
+        .key-wacht { background:repeating-linear-gradient(135deg, #cbd5e1 0 3px, #e2e8f0 3px 6px); margin-left:0.625rem; }
+        .factor-indicator { background:#f8fafc; border:1px solid #e2e8f0; }
+        .factor-value { color:#334155; font-variant-numeric:tabular-nums; }
+        .factor-end { font-size:0.875rem; color:#334155; font-weight:600; margin-top:0.5rem; }
+        .calc-hint { font-size:0.8125rem; color:#475569; margin:0 0 0.75rem; min-height:1.2em; }
+        .calc-hint:empty { display:none; }
+        .ex-btn { width:auto; margin-top:1.25rem; padding:0.625rem 1.125rem; color:#047857; border-color:#a7f3d0; }
+        .ex-btn:hover { background:#ecfdf5; border-color:#047857; color:#047857; }
+        .vb-bar { display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem 0.75rem; margin:0 0 1rem; padding:0.5rem 0.5rem 0.5rem 0.75rem; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; font-size:0.875rem; line-height:1.4; color:#78350f; }
+        .vb-bar[hidden] { display:none !important; }
+        .vb-bar svg { width:18px; height:18px; flex-shrink:0; color:#b45309; }
+        .vb-text { flex:1 1 14rem; min-width:0; display:flex; gap:0.5rem; align-items:flex-start; }
+        .vb-btns { display:flex; flex-wrap:wrap; gap:0.375rem; }
+        .vb-btn { min-height:44px; padding:0.375rem 0.625rem; border-radius:10px; font:inherit; font-size:0.875rem; font-weight:600; background:#fff; border:1px solid #e2e8f0; cursor:pointer; }
+        .vb-wis { color:#b91c1c; border-color:#fecaca; } .vb-wis:hover { background:#fef2f2; }
+        .vb-eigen { color:#047857; border-color:#a7f3d0; } .vb-eigen:hover { background:#ecfdf5; }
+        .input-item input { min-height:44px; font-variant-numeric:tabular-nums; }
+        .context-meta { font-size:0.75rem; font-weight:600; color:#334155; margin-top:0.25rem; font-variant-numeric:tabular-nums; }
     </style>
 </head>
 <body>
@@ -831,15 +859,7 @@
             Projectmanagement
         </a>
         <div class="logo" aria-hidden="true">
-            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="20" cy="20" r="16" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
-                    <path d="M20 10v10l6 3.5" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
-                    <circle cx="20" cy="20" r="2.5" fill="#10b981"/>
-                    <circle cx="20" cy="6" r="1.5" fill="#10b981" opacity="0.5"/>
-                    <circle cx="34" cy="20" r="1.5" fill="#10b981" opacity="0.5"/>
-                    <circle cx="20" cy="34" r="1.5" fill="#10b981" opacity="0.5"/>
-                    <circle cx="6" cy="20" r="1.5" fill="#10b981" opacity="0.5"/>
-                </svg>
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/><circle cx="20" cy="20" r="10" stroke="#334155" stroke-width="1.6" fill="#fff"/><path d="M20 10A10 10 0 0 1 29.5 23.1" stroke="#10b981" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M20 14v6l3.5 2.2" stroke="#334155" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="20" r="1.3" fill="#334155"/></svg>
         </div>
         <h1 class="title">Project Realisme Monitor</h1>
         <p class="subtitle">Hoe lang duurt het echt?</p>
@@ -852,25 +872,28 @@
             <div class="left-column">
                 <div class="card card-input">
                     <h2 class="card-title">Invoer</h2>
+                    <div class="vb-bar" id="vbBar" role="note" hidden>
+                        <span class="vb-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Dit is een voorbeeld om de tool te verkennen. Het telt niet mee in andere tools.</span></span>
+                        <span class="vb-btns"><button type="button" class="vb-btn vb-wis" id="vbWis">Wis voorbeeld</button><button type="button" class="vb-btn vb-eigen" id="vbEigen">Maak er mijn eigen van</button></span>
+                    </div>
                     
                     <div class="input-section">
-                    <!-- PERT Estimation -->
                     <div class="input-group">
                         <div class="input-group-title">
-                            <span class="help" id="pertHelp" tabindex="0" role="button">Drie-puntenschatting</span>
+                            <span class="help" id="schattingHelp" tabindex="0" role="button">Drie-puntenschatting</span>
                         </div>
                         <div class="three-inputs">
                             <div class="input-item optimistic">
                                 <label for="optimistic">Optimistisch</label>
-                                <input type="number" id="optimistic" min="1" max="999" value="10" placeholder="O">
+                                <input type="number" id="optimistic" min="1" max="999" inputmode="decimal" placeholder="bv. 20">
                             </div>
                             <div class="input-item realistic">
                                 <label for="realistic">Realistisch</label>
-                                <input type="number" id="realistic" min="1" max="999" value="15" placeholder="M">
+                                <input type="number" id="realistic" min="1" max="999" inputmode="decimal" placeholder="bv. 30">
                             </div>
                             <div class="input-item pessimistic">
                                 <label for="pessimistic">Pessimistisch</label>
-                                <input type="number" id="pessimistic" min="1" max="999" value="30" placeholder="P">
+                                <input type="number" id="pessimistic" min="1" max="999" inputmode="decimal" placeholder="bv. 60">
                             </div>
                         </div>
                         <div style="font-size: 0.6875rem; color: #047857; font-weight: 500; margin-top: 0.5rem; text-align: center;">
@@ -890,10 +913,7 @@
                                 <div class="context-info">
                                     <div class="context-name">Autonoom</div>
                                     <div class="context-desc">Focus op uitvoering, mandaat bij team</div>
-                                </div>
-                                <div class="context-badges">
-                                    <span class="context-badge efficiency">100%</span>
-                                    <span class="context-badge risk">P55</span>
+                                    <div class="context-meta">efficiëntie 100% · veilige marge 55%</div>
                                 </div>
                             </label>
                             <label class="context-option" data-context="tactical">
@@ -902,10 +922,7 @@
                                 <div class="context-info">
                                     <div class="context-name">Tactisch</div>
                                     <div class="context-desc">Afstemming met enkele ketenpartners</div>
-                                </div>
-                                <div class="context-badges">
-                                    <span class="context-badge efficiency">80%</span>
-                                    <span class="context-badge risk">P65</span>
+                                    <div class="context-meta">efficiëntie 80% · veilige marge 65%</div>
                                 </div>
                             </label>
                             <label class="context-option" data-context="governance">
@@ -914,10 +931,7 @@
                                 <div class="context-info">
                                     <div class="context-name">Bestuurlijk</div>
                                     <div class="context-desc">Besluitvorming via stuurgroepen</div>
-                                </div>
-                                <div class="context-badges">
-                                    <span class="context-badge efficiency">60%</span>
-                                    <span class="context-badge risk">P80</span>
+                                    <div class="context-meta">efficiëntie 60% · veilige marge 80%</div>
                                 </div>
                             </label>
                             <label class="context-option" data-context="political">
@@ -926,22 +940,13 @@
                                 <div class="context-info">
                                     <div class="context-name">Politiek</div>
                                     <div class="context-desc">Complexe belangen, procedures domineren</div>
-                                </div>
-                                <div class="context-badges">
-                                    <span class="context-badge efficiency">40%</span>
-                                    <span class="context-badge risk">P85</span>
+                                    <div class="context-meta">efficiëntie 40% · veilige marge 85%</div>
                                 </div>
                             </label>
                         </div>
                     </div>
 
-                    <button class="btn btn-primary" id="calculateBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        Bereken doorlooptijd
-                    </button>
+                    <p class="calc-hint" id="calcHint" aria-live="polite">Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.</p>
 
                     <button class="btn btn-outline" id="resetBtn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -964,12 +969,13 @@
                         </svg>
                         <h3>Vul je schatting in</h3>
                         <p>De tool berekent hoeveel kalendertijd je project<br>écht nodig heeft op basis van de context.</p>
+                        <button type="button" class="btn btn-outline ex-btn" id="exampleBtn">Voorbeeld bekijken</button>
                     </div>
 
                     <div id="resultsContent" style="display: none;">
                         <div class="result-header">
                             <h3 id="resultTitle">Resultaat</h3>
-                            <p id="resultSubtitle">Vergelijking werklast vs. doorlooptijd</p>
+                            <p id="resultSubtitle">Werklast en doorlooptijd naast elkaar</p>
                         </div>
 
                         <div class="bars-container">
@@ -993,10 +999,10 @@
                             <div class="bar-group">
                                 <div class="bar-label">
                                     <span class="bar-label-text">Doorlooptijd (kalender)</span>
-                                    <span><span class="bar-label-value red" id="durationValue">0</span><span class="bar-label-unit">werkdagen</span></span>
+                                    <span><span class="bar-label-value dur" id="durationValue">0</span><span class="bar-label-unit">werkdagen</span></span>
                                 </div>
                                 <div class="bar-track">
-                                    <div class="bar-fill red" id="durationBar" style="width: 0%">
+                                    <div class="bar-fill dur" id="durationBar" style="width: 0%">
                                         <svg class="bar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                                             <line x1="16" y1="2" x2="16" y2="6"/>
@@ -1005,12 +1011,13 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <div class="bar-description">Bruto kalendertijd inclusief wachttijd en afstemming</div>
+                                <div class="bar-description"><span class="key key-werk"></span>werk <span class="key key-wacht"></span>wachten en afstemmen</div>
                             </div>
 
                             <div class="factor-indicator" id="factorIndicator">
-                                <div class="factor-value" id="factorValue">1.0×</div>
+                                <div class="factor-value" id="factorValue">1×</div>
                                 <div class="factor-label">factor tussen werklast en doorlooptijd</div>
+                                <div class="factor-end" id="endDate"></div>
                             </div>
                         </div>
 
@@ -1029,11 +1036,11 @@
                         <div class="export-row">
                             <button class="btn btn-outline" id="exportPng" type="button">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
-                                Download als afbeelding
+                                Afbeelding
                             </button>
                             <button class="btn btn-outline" id="exportPdf" type="button">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 15h6M9 18h4"/></svg>
-                                Download als PDF
+                                PDF
                             </button>
                         </div>
                     </div>
@@ -1057,12 +1064,12 @@
                             <div class="method-item-text">De drie-puntenschatting weegt het meest waarschijnlijke scenario het zwaarst. Gemiddelde: <code>μ = (O + 4M + P) / 6</code> en standaardafwijking: <code>σ = (P - O) / 6</code></div>
                         </div>
                         <div class="method-item">
-                            <div class="method-item-title">Monte Carlo-simulatie</div>
-                            <div class="method-item-text">De tool draait 2000 simulaties met een normale verdeling. Afhankelijk van de context wordt een percentiel gekozen: P55 voor autonome teams (een lichte correctie voor te veel optimisme), tot P85 voor politieke contexten.</div>
+                            <div class="method-item-title">Veilige marge</div>
+                            <div class="method-item-text">We rekenen 2000 mogelijke verlopen door rond de gewogen verwachting. Afhankelijk van de context nemen we de werklast die je in 55% van die verlopen haalt (autonome teams: een lichte correctie voor te veel optimisme) tot 85% (politieke context). Dezelfde invoer geeft altijd dezelfde uitkomst.</div>
                         </div>
                         <div class="method-item">
                             <div class="method-item-title">Efficiëntiefactor</div>
-                            <div class="method-item-text">De kalendertijd wordt berekend door de werklast te delen door de efficiëntie (40% tot 100%). Dit modelleert wachttijd, afstemming en besluitvorming.</div>
+                            <div class="method-item-text">De kalendertijd is de werklast gedeeld door de efficiëntie (40% tot 100%). Zo tellen wachttijd, afstemming en besluitvorming mee. De einddatum telt werkdagen vanaf vandaag (maandag tot vrijdag, zonder feestdagen).</div>
                         </div>
                         <div class="method-item">
                             <div class="method-item-title">Privacy</div>
@@ -1181,49 +1188,44 @@ const ocExport = (() => {
   return { png, pdf };
 })();
 
-        // Configuration per context
+        // Instellingen per context: efficiëntie en de veilige marge (hoe zeker je de werklast haalt)
         const CONTEXTS = {
-            autonomous: { efficiency: 1.00, percentile: 0.55, name: 'Autonoom', risk: 'P55' },
-            tactical:   { efficiency: 0.80, percentile: 0.65, name: 'Tactisch', risk: 'P65' },
-            governance: { efficiency: 0.60, percentile: 0.80, name: 'Bestuurlijk', risk: 'P80' },
-            political:  { efficiency: 0.40, percentile: 0.85, name: 'Politiek', risk: 'P85' }
+            autonomous: { efficiency: 1.00, percentile: 0.55, name: 'Autonoom' },
+            tactical:   { efficiency: 0.80, percentile: 0.65, name: 'Tactisch' },
+            governance: { efficiency: 0.60, percentile: 0.80, name: 'Bestuurlijk' },
+            political:  { efficiency: 0.40, percentile: 0.85, name: 'Politiek' }
         };
+        const zeker = cfg => `${Math.round(cfg.percentile * 100)}% zekerheid`;
 
         const SIMULATIONS = 2000;
 
-        // Box-Muller transform for normal distribution
-        function normalRandom(mean, stdDev) {
-            let u1 = Math.random();
-            let u2 = Math.random();
-            while (u1 === 0) u1 = Math.random();
-            const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-            return mean + z * stdDev;
+        // Toeval met een vaste startwaarde die uit de invoer volgt: dezelfde invoer geeft altijd dezelfde uitkomst.
+        function seedOf(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+        function rng(seed) { let a = seed || 1; return () => { a = (a + 0x6D2B79F5) | 0; let x = Math.imul(a ^ (a >>> 15), 1 | a); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
+        // Een getal uit een klokvormige spreiding rond het gemiddelde
+        function normalRandom(rand, mean, stdDev) {
+            let u1 = rand(); const u2 = rand();
+            while (u1 === 0) u1 = rand();
+            return mean + Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2) * stdDev;
         }
 
-        // Monte Carlo simulation
+        // Mogelijke verlopen doorrekenen
         function runSimulation(optimistic, realistic, pessimistic, context) {
-            // PERT calculations
+            // gewogen verwachting en spreiding uit de drie schattingen
             const mean = (optimistic + 4 * realistic + pessimistic) / 6;
             const stdDev = (pessimistic - optimistic) / 6;
+            const rand = rng(seedOf([optimistic, realistic, pessimistic, context].join('|')));
 
-            // Run simulations
             const results = [];
             for (let i = 0; i < SIMULATIONS; i++) {
-                let value = normalRandom(mean, stdDev);
-                // Floor: can't be less than optimistic estimate
-                value = Math.max(value, optimistic);
-                results.push(value);
+                // nooit minder dan de optimistische schatting
+                results.push(Math.max(normalRandom(rand, mean, stdDev), optimistic));
             }
-
-            // Sort for percentile extraction
             results.sort((a, b) => a - b);
 
-            // Extract effort at chosen percentile
+            // de werklast die je in zoveel procent van de verlopen haalt
             const config = CONTEXTS[context];
-            const index = Math.floor(config.percentile * SIMULATIONS);
-            const effort = results[Math.min(index, SIMULATIONS - 1)];
-
-            // Calculate calendar duration
+            const effort = results[Math.min(Math.floor(config.percentile * SIMULATIONS), SIMULATIONS - 1)];
             const duration = effort / config.efficiency;
 
             return {
@@ -1239,16 +1241,16 @@ const ocExport = (() => {
         // Generate diagnosis text
         function getDiagnosis(result, context) {
             const config = CONTEXTS[context];
-            const factorText = result.factor > 1 ? `factor ${result.factor}×` : 'gelijk aan';
+            const factorText = result.factor > 1 ? `${fmt(result.factor)} keer` : 'even lang als';
             
             const diagnoses = {
-                autonomous: `Je planning is gebaseerd op een licht gecorrigeerd scenario (${config.risk}) dat rekening houdt met onvoorziene tegenvallers. In een autonome context loopt de doorlooptijd synchroon met de werklast. Dit past bij teams met volledig mandaat en minimale externe afhankelijkheden.`,
+                autonomous: `Je planning is gebaseerd op een licht gecorrigeerd scenario (${zeker(config)}) dat rekening houdt met onvoorziene tegenvallers. In een autonome context loopt de doorlooptijd synchroon met de werklast. Dit past bij teams met volledig mandaat en minimale externe afhankelijkheden.`,
                 
-                tactical: `De tool rekent met een gemiddelde onzekerheidsmarge (${config.risk}). Door afstemming met ketenpartners is circa 20% van de tijd 'niet-productief'. Je doorlooptijd is ${factorText} langer dan de netto werklast.`,
+                tactical: `De tool rekent met een gemiddelde onzekerheidsmarge (${zeker(config)}). Door afstemming met ketenpartners is circa 20% van de tijd 'niet-productief'. Je doorlooptijd is ${factorText} zo lang als de netto werklast.`,
                 
-                governance: `Let op: Door besluitvorming via stuurgroepen en managementlagen hanteert de tool een veilige marge (${config.risk}). De efficiëntie van 60% betekent dat 40% van de kalendertijd opgaat aan wachten en afstemmen. Plan je oplevermomenten ruim.`,
+                governance: `Let op: Door besluitvorming via stuurgroepen en managementlagen hanteert de tool een veilige marge (${zeker(config)}). De efficiëntie van 60% betekent dat 40% van de kalendertijd opgaat aan wachten en afstemmen. Plan je oplevermomenten ruim.`,
                 
-                political: `Waarschuwing: In een politieke context is budgetoverschrijding dodelijk voor het vertrouwen. De tool hanteert daarom de hoogste zekerheidsmarge (${config.risk}). Met slechts 40% effectieve productietijd is je doorlooptijd ${factorText} langer dan de werklast. Communiceer actief over deze realiteit naar stakeholders.`
+                political: `Waarschuwing: In een politieke context is budgetoverschrijding dodelijk voor het vertrouwen. De tool hanteert daarom de hoogste zekerheidsmarge (${zeker(config)}). Met slechts 40% effectieve productietijd is je doorlooptijd ${factorText} zo lang als de werklast. Vertel dat open aan alle betrokkenen.`
             };
             
             return diagnoses[context];
@@ -1263,7 +1265,15 @@ const ocExport = (() => {
             clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
         }
         const escHtml = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
-        const fmt = n => String(n).replace('.', ',');
+        const fmt = n => Number(n).toLocaleString('nl-BE', { maximumFractionDigits: 1 });
+        function ocProject(fb) { try { const p = JSON.parse(localStorage.getItem('oc.project')); return p && typeof p.name === 'string' && p.name.trim() ? p.name.trim().slice(0, 80) : fb; } catch { return fb; } }
+        // Einddatum: zoveel werkdagen (ma-vr) vanaf vandaag
+        function endDate(workdays) {
+            const d = new Date(); let left = Math.ceil(workdays);
+            while (left > 0) { d.setDate(d.getDate() + 1); const w = d.getDay(); if (w !== 0 && w !== 6) left--; }
+            return d.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        const durBg = (effort, duration) => { const g = (effort / duration * 100).toFixed(1); return `linear-gradient(90deg, #10b981 0 ${g}%, transparent ${g}%), repeating-linear-gradient(135deg, #cbd5e1 0 5px, #e2e8f0 5px 10px)`; };
         function buildExport() {
             const { O, M, P, context, result, diagnosis } = lastCalc;
             const cfg = CONTEXTS[context];
@@ -1272,33 +1282,33 @@ const ocExport = (() => {
             const cell = (label, value, color) => `<div style="flex:1;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;border-left:4px solid ${color}">
                 <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#64748b">${label}</div>
                 <div style="font-size:22px;font-weight:700;color:#1e293b;margin-top:2px">${fmt(value)} <span style="font-size:13px;font-weight:500;color:#64748b">mensdagen</span></div></div>`;
-            const bar = (label, value, unit, color, desc) => `<div style="margin-bottom:18px" data-oc-keep>
+            const bar = (label, value, unit, color, desc, bg) => `<div style="margin-bottom:18px" data-oc-keep>
                 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
                     <span style="font-size:14px;font-weight:600;color:#334155">${label}</span>
                     <span><span style="font-size:24px;font-weight:700;color:${color}">${fmt(value)}</span> <span style="font-size:13px;color:#64748b">${unit}</span></span>
                 </div>
-                <div style="height:18px;background:#f1f5f9;border-radius:9px;overflow:hidden"><div style="height:100%;width:${(value / max * 100).toFixed(1)}%;background:${color};border-radius:9px"></div></div>
+                <div style="height:18px;background:#f1f5f9;border-radius:9px;overflow:hidden"><div style="height:100%;width:${(value / max * 100).toFixed(1)}%;background:${bg || color};border-radius:9px"></div></div>
                 <div style="font-size:12px;color:#64748b;margin-top:5px">${desc}</div></div>`;
             const section = t => `<div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;margin:4px 0 10px">${t}</div>`;
             node.innerHTML = `
                 <div data-oc-keep>
                     ${section('Invoer: drie-puntenschatting')}
                     <div style="display:flex;gap:12px;margin-bottom:12px">
-                        ${cell('Optimistisch', O, '#10b981')}${cell('Realistisch', M, '#3b82f6')}${cell('Pessimistisch', P, '#f97316')}
+                        ${cell('Optimistisch', O, '#10b981')}${cell('Realistisch', M, '#334155')}${cell('Pessimistisch', P, '#d97706')}
                     </div>
                     <div style="display:flex;gap:24px;font-size:13px;color:#475569;margin-bottom:22px">
                         <span>Organisatorische context: <strong style="color:#1e293b">${escHtml(cfg.name)}</strong></span>
                         <span>Efficiëntie: <strong style="color:#1e293b">${Math.round(cfg.efficiency * 100)}%</strong></span>
-                        <span>Zekerheid: <strong style="color:#1e293b">${cfg.risk}</strong></span>
+                        <span>Veilige marge: <strong style="color:#1e293b">${zeker(cfg)}</strong></span>
                     </div>
                 </div>
                 <div data-oc-keep>
                     ${section('Resultaat')}
                     ${bar('Netto werklast (inspanning)', result.effort, 'mensdagen', '#047857', 'Netto werktijd nodig om het project af te ronden')}
-                    ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#b91c1c', 'Bruto kalendertijd inclusief wachttijd en afstemming')}
+                    ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#334155', 'Groen: werk · gearceerd: wachten en afstemmen', durBg(result.effort, result.duration))}
                     <div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:10px;padding:12px 16px;margin:6px 0 22px">
                         <span style="font-size:26px;font-weight:700;color:#1e293b">${fmt(result.factor)}×</span>
-                        <span style="font-size:13px;color:#64748b">factor tussen werklast en doorlooptijd</span>
+                        <span style="font-size:13px;color:#64748b">factor tussen werklast en doorlooptijd · start je vandaag, dan ben je klaar rond ${escHtml(endDate(result.duration))}</span>
                     </div>
                 </div>
                 <div data-oc-keep>
@@ -1306,15 +1316,17 @@ const ocExport = (() => {
                     <p style="font-size:14px;line-height:1.6;color:#334155;margin:0 0 18px">${escHtml(diagnosis)}</p>
                 </div>
                 <div data-oc-keep style="font-size:12px;line-height:1.55;color:#64748b;border-top:1px solid #f1f5f9;padding-top:12px">
-                    Methode: gewogen verwachting ${fmt(result.mean)} mensdagen (spreiding ${fmt(result.stdDev)}), ${SIMULATIONS} Monte Carlo-simulaties.
-                    De werklast is het ${cfg.risk.replace('P', '')}e percentiel; de doorlooptijd is werklast gedeeld door de efficiëntie (${Math.round(cfg.efficiency * 100)}%).
-                    Elke berekening trekt nieuwe toevalsgetallen, dus een herberekening kan licht verschillen.
+                    Werkwijze: gewogen verwachting ${fmt(result.mean)} mensdagen (spreiding ${fmt(result.stdDev)}). We rekenen ${SIMULATIONS} mogelijke verlopen door en nemen de werklast die je in ${Math.round(cfg.percentile * 100)}% ervan haalt.
+                    De doorlooptijd is de werklast gedeeld door de efficiëntie (${Math.round(cfg.efficiency * 100)}%). Dezelfde invoer geeft altijd dezelfde uitkomst.
                 </div>`;
-            return { node, title: 'Project Realisme Monitor', subtitle: `Inschatting · context ${cfg.name}` };
+            const pr = ocProject(''); return { node, title: 'Project Realisme Monitor', subtitle: `${pr ? pr + ' · ' : ''}Inschatting · context ${cfg.name}` };
         }
         async function doExport(kind) {
             if (!lastCalc) { ocToast('Bereken eerst een inschatting'); return; }
-            const name = 'realisme-' + CONTEXTS[lastCalc.context].name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-') + '-' + new Date().toISOString().slice(0, 10);
+            // Bestandsnaam: project-realisme-projectnaam-JJJJ-MM-DD (zonder dubbele datum)
+            const d = new Date(), iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const pr = ocProject('').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50).replace(/-$/, '');
+            const name = ['project-realisme', pr, iso].filter(Boolean).join('-');
             ocToast('Bezig…');
             try {
                 await (kind === 'png' ? ocExport.png(buildExport, name) : ocExport.pdf(buildExport, name));
@@ -1328,8 +1340,9 @@ const ocExport = (() => {
             const effortPercent = (effort / maxValue) * 100;
             const durationPercent = (duration / maxValue) * 100;
 
-            document.getElementById('effortValue').textContent = effort;
-            document.getElementById('durationValue').textContent = duration;
+            document.getElementById('effortValue').textContent = fmt(effort);
+            document.getElementById('durationValue').textContent = fmt(duration);
+            document.getElementById('durationBar').style.background = durBg(effort, duration);
             
             setTimeout(() => {
                 document.getElementById('effortBar').style.width = effortPercent + '%';
@@ -1337,82 +1350,65 @@ const ocExport = (() => {
             }, 100);
         }
 
-        // Main calculation
-        function calculate() {
-            const O = parseFloat(document.getElementById('optimistic').value) || 0;
-            const M = parseFloat(document.getElementById('realistic').value) || 0;
-            const P = parseFloat(document.getElementById('pessimistic').value) || 0;
-            const context = document.querySelector('input[name="context"]:checked').value;
-
-            // Validation
-            if (O <= 0 || M <= 0 || P <= 0) {
-                showError('Vul alle drie de schattingen in (groter dan 0).');
-                return;
-            }
-            if (O >= M || M >= P) {
-                showError('De volgorde moet zijn: Optimistisch < Realistisch < Pessimistisch');
-                return;
-            }
-
-            // Run simulation
-            const result = runSimulation(O, M, P, context);
-            lastCalc = { O, M, P, context, result, diagnosis: getDiagnosis(result, context) };
-
-            // Show results
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('resultsContent').style.display = 'block';
-
-            document.getElementById('resultTitle').textContent = 'Resultaat';
-            document.getElementById('resultSubtitle').textContent = `Context: ${result.context.name} · ${result.context.risk} zekerheid`;
-
-            animateBars(result.effort, result.duration);
-            
-            document.getElementById('factorValue').textContent = result.factor + '×';
-            document.getElementById('diagnosisText').textContent = getDiagnosis(result, context);
-
-            // Visual feedback on button
-            const btn = document.getElementById('calculateBtn');
-            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Berekend`;
-            setTimeout(() => {
-                btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Bereken doorlooptijd`;
-            }, 1500);
-        }
-
-        function showError(message) {
-            const tooltip = document.getElementById('tooltip');
-            const btn = document.getElementById('calculateBtn');
-            const rect = btn.getBoundingClientRect();
-            
-            tooltip.textContent = message;
-            tooltip.style.maxWidth = Math.min(300, innerWidth - 16) + 'px';
-            tooltip.style.left = '0px';
-            tooltip.style.left = Math.max(8, Math.min(rect.left, innerWidth - tooltip.offsetWidth - 8)) + 'px';
-            tooltip.style.top = (rect.bottom + 10) + 'px';
-            tooltip.classList.add('show');
-            
-            setTimeout(() => tooltip.classList.remove('show'), 3000);
-        }
-
-        function reset() {
+        // Berekenen: telkens opnieuw zodra de invoer verandert (geen knop nodig)
+        let voorbeeld = false;
+        function hint(msg) { document.getElementById('calcHint').textContent = msg; }
+        function showEmpty() {
             lastCalc = null;
-            document.getElementById('optimistic').value = '10';
-            document.getElementById('realistic').value = '15';
-            document.getElementById('pessimistic').value = '30';
-            
-            document.querySelectorAll('.context-option').forEach(opt => opt.classList.remove('selected'));
-            document.querySelector('.context-option[data-context="autonomous"]').classList.add('selected');
-            document.querySelector('input[name="context"][value="autonomous"]').checked = true;
-            
             document.getElementById('emptyState').style.display = 'block';
             document.getElementById('resultsContent').style.display = 'none';
             document.getElementById('effortBar').style.width = '0%';
             document.getElementById('durationBar').style.width = '0%';
         }
+        function calculate() {
+            const raw = ['optimistic', 'realistic', 'pessimistic'].map(id => document.getElementById(id).value.trim());
+            const [O, M, P] = raw.map(v => parseFloat(v.replace(',', '.')) || 0);
+            const context = document.querySelector('input[name="context"]:checked').value;
+            document.getElementById('vbBar').hidden = !voorbeeld;
+
+            if (raw.some(v => v === '')) { showEmpty(); hint('Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.'); return; }
+            if (O <= 0 || M <= 0 || P <= 0) { showEmpty(); hint('Vul drie getallen groter dan 0 in.'); return; }
+            if (O >= M || M >= P) { showEmpty(); hint('De volgorde moet kloppen: optimistisch < realistisch < pessimistisch.'); return; }
+            hint('');
+
+            const result = runSimulation(O, M, P, context);
+            lastCalc = { O, M, P, context, result, diagnosis: getDiagnosis(result, context) };
+
+            const first = document.getElementById('resultsContent').style.display === 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsContent').style.display = 'block';
+            document.getElementById('resultTitle').textContent = 'Resultaat';
+            document.getElementById('resultSubtitle').textContent = `Context: ${result.context.name} · veilige marge ${zeker(result.context)}`;
+            if (first) { document.getElementById('effortBar').style.width = '0%'; document.getElementById('durationBar').style.width = '0%'; }
+            animateBars(result.effort, result.duration);
+            document.getElementById('factorValue').textContent = fmt(result.factor) + '×';
+            document.getElementById('endDate').textContent = `Start je vandaag, dan ben je klaar rond ${endDate(result.duration)}.`;
+            document.getElementById('diagnosisText').textContent = lastCalc.diagnosis;
+        }
+        function setInputs(o, m, p, ctx) {
+            document.getElementById('optimistic').value = o;
+            document.getElementById('realistic').value = m;
+            document.getElementById('pessimistic').value = p;
+            const r = document.querySelector(`input[name="context"][value="${ctx}"]`); r.checked = true;
+            document.querySelectorAll('.context-option').forEach(o2 => o2.classList.toggle('selected', o2.dataset.context === ctx));
+        }
+        // Voorbeeld: een nieuw premiereglement uitwerken, met besluitvorming via een stuurgroep
+        function loadExample() { voorbeeld = true; setInputs('20', '30', '60', 'governance'); calculate(); ocToast('Voorbeeld geladen'); }
+
+        function reset() {
+            voorbeeld = false;
+            setInputs('', '', '', 'autonomous');
+            calculate();
+        }
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('calculateBtn').addEventListener('click', calculate);
             document.getElementById('resetBtn').addEventListener('click', reset);
+            document.getElementById('exampleBtn').addEventListener('click', loadExample);
+            document.getElementById('vbWis').addEventListener('click', () => { reset(); ocToast('Voorbeeld gewist'); });
+            document.getElementById('vbEigen').addEventListener('click', () => { voorbeeld = false; calculate(); ocToast('Het voorbeeld is nu van jou'); });
+            ['optimistic', 'realistic', 'pessimistic'].forEach(id => document.getElementById(id).addEventListener('input', calculate));
+            document.querySelectorAll('input[name="context"]').forEach(r => r.addEventListener('change', calculate));
             document.getElementById('exportPng').addEventListener('click', () => doExport('png'));
             document.getElementById('exportPdf').addEventListener('click', () => doExport('pdf'));
 
@@ -1454,17 +1450,17 @@ const ocExport = (() => {
                 tooltip.classList.remove('show');
             }
 
-            document.getElementById('pertHelp').addEventListener('mouseenter', e => {
-                showTooltip(e.target, 'Een drie-puntenschatting helpt om met onzekerheid te schatten. Schat drie scenario\'s: het beste geval (optimistisch), het meest waarschijnlijke (realistisch) en het slechtste geval (pessimistisch). De tool simuleert duizenden uitkomsten om een realistische verwachting te berekenen.');
+            document.getElementById('schattingHelp').addEventListener('mouseenter', e => {
+                showTooltip(e.target, 'Een drie-puntenschatting helpt om met onzekerheid te schatten. Schat drie scenario\'s: het beste geval (optimistisch), het meest waarschijnlijke (realistisch) en het slechtste geval (pessimistisch). De tool rekent 2000 mogelijke verlopen door om een realistische verwachting te berekenen.');
             });
-            document.getElementById('pertHelp').addEventListener('mouseleave', hideTooltip);
+            document.getElementById('schattingHelp').addEventListener('mouseleave', hideTooltip);
 
             document.getElementById('contextHelp').addEventListener('mouseenter', e => {
                 showTooltip(e.target, 'De organisatorische context bepaalt twee dingen: (1) hoeveel van je tijd echt productief is (efficiëntie), en (2) hoeveel zekerheidsmarge de tool hanteert (risicoprofiel). Hoe politieker de context, hoe meer buffer wordt ingebouwd.');
             });
             document.getElementById('contextHelp').addEventListener('mouseleave', hideTooltip);
             // uitleg ook bij focus en tikken
-            ['pertHelp', 'contextHelp'].forEach(id => {
+            ['schattingHelp', 'contextHelp'].forEach(id => {
                 const el = document.getElementById(id);
                 const show = () => el.dispatchEvent(new MouseEvent('mouseenter'));
                 el.addEventListener('focus', show);
@@ -1473,12 +1469,7 @@ const ocExport = (() => {
                 el.addEventListener('keydown', e => { if (e.key === 'Escape') hideTooltip(); });
             });
 
-            // Enter key to calculate
-            document.querySelectorAll('input[type="number"]').forEach(input => {
-                input.addEventListener('keypress', e => {
-                    if (e.key === 'Enter') calculate();
-                });
-            });
+            calculate();
         });
     </script>
 </body>

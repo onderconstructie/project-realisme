@@ -14,6 +14,8 @@
     <meta name="oc:traject" content="project:4">
     <meta name="oc:opslag" content="realisme.v1, oc.share.project-realisme">
 <link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="preload" href="/fonts/dm-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/dm-sans-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=&quot;0 0 40 40&quot; fill=&quot;none&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;18&quot; fill=&quot;%23f8fafc&quot; stroke=&quot;%23e2e8f0&quot; stroke-width=&quot;1.5&quot;/%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;10&quot; stroke=&quot;%2364748b&quot; stroke-width=&quot;1.6&quot; fill=&quot;%23fff&quot;/%3E%3Cpath d=&quot;M20 10A10 10 0 0 1 29.5 23.1&quot; stroke=&quot;%2310b981&quot; stroke-width=&quot;3&quot; fill=&quot;none&quot; stroke-linecap=&quot;round&quot;/%3E%3Cpath d=&quot;M20 14v6l3.5 2.2&quot; stroke=&quot;%2364748b&quot; stroke-width=&quot;1.8&quot; fill=&quot;none&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;1.3&quot; fill=&quot;%2364748b&quot;/%3E%3C/svg%3E">
     <style>
         :root {
@@ -875,6 +877,18 @@
         .oc-toast button { font:inherit; font-size:0.875rem; font-weight:700; color:#a7f3d0; background:none; border:0; min-height:44px; padding:0 0.5rem; cursor:pointer; border-radius:8px; }
         .oc-toast button[hidden] { display:none; }
         .oc-toast button:focus-visible { outline:2px solid #a7f3d0; outline-offset:2px; }
+
+/* ---------- Soepel op gsm (oktober 2026): tikken, typen, schuiven ---------- */
+html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+button, a, summary, label, select, [role="button"], [role="tab"], [data-act], input[type="range"], input[type="checkbox"], input[type="radio"] { touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+@media (hover:none) { button:not(:disabled):active, a:active, summary:active, [role="button"]:active, [role="tab"]:active { filter:brightness(0.93); } }
+@media (pointer:coarse) { #projName { font-size:16px !important; } }
+/* venster open: de pagina erachter schuift niet mee, en scrollen binnen het venster loopt niet door naar de pagina */
+html:has(.ocs-back, .ocw-back, .gal-back, .oc-dialog-backdrop) { overflow:hidden; }
+.ocs-back *, .ocw-back *, .gal-back * { overscroll-behavior:contain; }
+
+body { min-height:100dvh; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration:0.01ms !important; animation-duration:0.01ms !important; } }
     </style>
 </head>
 <body>
@@ -900,7 +914,7 @@
                     <h2 class="card-title">Invoer</h2>
                     <div class="proj-row">
                         <label for="projName">Project</label>
-                        <input type="text" id="projName" autocomplete="off" maxlength="80" placeholder="Naam van je project">
+                        <input type="text" id="projName" autocomplete="off" enterkeyhint="done" maxlength="80" placeholder="Naam van je project">
                     </div>
                     <div class="vb-bar" id="vbBar" role="note" hidden>
                         <span class="vb-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Dit is een voorbeeld om de tool te verkennen. Het telt niet mee in andere tools.</span></span>
@@ -915,15 +929,15 @@
                         <div class="three-inputs">
                             <div class="input-item optimistic">
                                 <label for="optimistic">Optimistisch</label>
-                                <input type="number" id="optimistic" min="1" max="999" inputmode="decimal" placeholder="bv. 20">
+                                <input type="number" id="optimistic" min="1" max="999" inputmode="decimal" enterkeyhint="next" placeholder="bv. 20">
                             </div>
                             <div class="input-item realistic">
                                 <label for="realistic">Realistisch</label>
-                                <input type="number" id="realistic" min="1" max="999" inputmode="decimal" placeholder="bv. 30">
+                                <input type="number" id="realistic" min="1" max="999" inputmode="decimal" enterkeyhint="next" placeholder="bv. 30">
                             </div>
                             <div class="input-item pessimistic">
                                 <label for="pessimistic">Pessimistisch</label>
-                                <input type="number" id="pessimistic" min="1" max="999" inputmode="decimal" placeholder="bv. 60">
+                                <input type="number" id="pessimistic" min="1" max="999" inputmode="decimal" enterkeyhint="done" placeholder="bv. 60">
                             </div>
                         </div>
                         <div style="font-size: 0.6875rem; color: #047857; font-weight: 500; margin-top: 0.5rem; text-align: center;">
@@ -1578,6 +1592,12 @@ const ocExport = (() => {
                 e.name = v; persist();
             });
             pn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); pn.blur(); } });
+            // Enter in een schatting: door naar de volgende, na de laatste klapt het toetsenbord dicht
+            ['optimistic', 'realistic', 'pessimistic'].forEach((id, i, all) => document.getElementById(id).addEventListener('keydown', e => {
+                if (e.key !== 'Enter' || e.isComposing) return;
+                e.preventDefault(); const next = all[i + 1];
+                if (next) document.getElementById(next).focus(); else e.target.blur();
+            }));
             window.addEventListener('storage', e => { if (e.key === 'oc.project') { const n = ocProject(''); if (n && n !== cur().name) { loadStore(); followAppProject(); showProject(store.current); } } });
             document.getElementById('projTabs').addEventListener('click', e => {
                 if (e.target.closest('#newProj')) { newProject(); return; }
@@ -1657,6 +1677,22 @@ const ocExport = (() => {
             calculate(true);
         });
     </script>
+<script>
+/* Soepel: de hulpbibliotheken voor Afbeelding en PDF alvast ophalen zodra iemand naar een downloadknop gaat (niet bij het laden). */
+(() => {
+  let warm = false;
+  const go = () => {
+    warm = true;
+    ['/lib/html2canvas-1.4.1.min.js', '/lib/jspdf-2.5.1.umd.min.js'].forEach(h => {
+      const l = document.createElement('link');
+      if (l.relList && l.relList.supports && l.relList.supports('prefetch')) { l.rel = 'prefetch'; l.as = 'script'; l.href = h; document.head.appendChild(l); }
+      else try { fetch(h).catch(() => {}); } catch (e) {}
+    });
+  };
+  const SEL = '#exportPng, #exportPdf';
+  ['pointerdown', 'focusin', 'mouseover'].forEach(t => document.addEventListener(t, e => { if (!warm && e.target.closest && e.target.closest(SEL)) go(); }, { passive:true, capture:true }));
+})();
+</script>
 <script>
 /* oc-sync: reageert op "Afsluiten" in de app (ook in andere tabbladen) en geeft Esc door aan de app */
 (function () {

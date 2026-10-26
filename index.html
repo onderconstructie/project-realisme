@@ -860,6 +860,21 @@
         .proj-row input:focus { border-color:#10b981; outline:none; }
         .proj-row input:focus-visible { outline:2px solid #047857; outline-offset:2px; }
         .saved-note { font-size:0.75rem; color:#64748b; margin-top:0.5rem; }
+        /* Per project: tabbladen (zelfde als Risicomatrix en Project Radar) */
+        .proj-tabs { display:flex; gap:0.5rem; overflow-x:auto; scrollbar-width:none; justify-content:safe center; padding:0.125rem 0.25rem 0.25rem; margin:0 0 0.75rem; }
+        .proj-tabs::-webkit-scrollbar { display:none; }
+        .ptab { flex-shrink:0; min-height:44px; padding:0.4375rem 0.875rem; border-radius:999px; font:inherit; font-size:0.875rem; font-weight:600; border:1px solid #e2e8f0; background:#fff; color:#475569; white-space:nowrap; display:flex; align-items:center; gap:0.375rem; cursor:pointer; }
+        .ptab:hover { border-color:#cbd5e1; }
+        .ptab.active { background:#1e293b; border-color:#1e293b; color:#fff; }
+        .ptab.add { color:#047857; border-style:dashed; }
+        .ptab .vb-tag { font-size:0.6875rem; font-weight:600; padding:0 0.375rem; border-radius:999px; background:#fef3c7; color:#92400e; }
+        .ptab:focus-visible { outline:2px solid #047857; outline-offset:2px; }
+        .btn-outline.btn-del { color:#b91c1c; }
+        .btn-outline.btn-del:hover { border-color:#fecaca; background:#fef2f2; color:#b91c1c; }
+        .oc-toast { display:flex; align-items:center; gap:0.75rem; }
+        .oc-toast button { font:inherit; font-size:0.875rem; font-weight:700; color:#a7f3d0; background:none; border:0; min-height:44px; padding:0 0.5rem; cursor:pointer; border-radius:8px; }
+        .oc-toast button[hidden] { display:none; }
+        .oc-toast button:focus-visible { outline:2px solid #a7f3d0; outline-offset:2px; }
     </style>
 </head>
 <body>
@@ -876,6 +891,7 @@
     </header>
 
     <div class="container">
+        <nav class="proj-tabs" id="projTabs" aria-label="Projecten"></nav>
 
         <div class="main-grid">
             <!-- Left column -->
@@ -884,8 +900,7 @@
                     <h2 class="card-title">Invoer</h2>
                     <div class="proj-row">
                         <label for="projName">Project</label>
-                        <input type="text" id="projName" list="projList" autocomplete="off" maxlength="80" placeholder="Naam van je project">
-                        <datalist id="projList"></datalist>
+                        <input type="text" id="projName" autocomplete="off" maxlength="80" placeholder="Naam van je project">
                     </div>
                     <div class="vb-bar" id="vbBar" role="note" hidden>
                         <span class="vb-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Dit is een voorbeeld om de tool te verkennen. Het telt niet mee in andere tools.</span></span>
@@ -969,7 +984,7 @@
                             <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/>
                             <path d="M3 3v5h5"/>
                         </svg>
-                        Opnieuw beginnen
+                        <span id="resetLabel">Opnieuw beginnen</span>
                     </button>
                 </div>
             </div>
@@ -1275,10 +1290,19 @@ const ocExport = (() => {
         /* ---------- Download als afbeelding of PDF ---------- */
         let lastCalc = null;
         let toastTimer = null;
-        function ocToast(msg) {
+        // Melding, eventueel met Ongedaan (6 s)
+        let toastUndo = null;
+        function ocToast(msg, undo) {
             const t = document.getElementById('ocToast');
-            t.textContent = msg; t.classList.add('show');
-            clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+            if (!t.querySelector('span')) {
+                t.innerHTML = '<span></span><button type="button" hidden>Ongedaan</button>';
+                t.querySelector('button').addEventListener('click', () => { const f = toastUndo; toastUndo = null; t.classList.remove('show'); if (f) f(); });
+            }
+            toastUndo = typeof undo === 'function' ? undo : null;
+            t.querySelector('span').textContent = msg;
+            t.querySelector('button').hidden = !toastUndo;
+            t.classList.add('show');
+            clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.classList.remove('show'); toastUndo = null; }, toastUndo ? 6000 : 2600);
         }
         const escHtml = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
         const fmt = n => Number(n).toLocaleString('nl-BE', { maximumFractionDigits: 1 });
@@ -1335,13 +1359,13 @@ const ocExport = (() => {
                     Werkwijze: gewogen verwachting ${fmt(result.mean)} mensdagen (spreiding ${fmt(result.stdDev)}). We rekenen ${SIMULATIONS} mogelijke verlopen door en nemen de werklast die je in ${Math.round(cfg.percentile * 100)}% ervan haalt.
                     De doorlooptijd is de werklast gedeeld door de efficiëntie (${Math.round(cfg.efficiency * 100)}%). Dezelfde invoer geeft altijd dezelfde uitkomst.
                 </div>`;
-            const pr = curName || ocProject(''); return { node, title: 'Project Realisme Monitor', subtitle: `${pr ? pr + ' · ' : ''}Inschatting · context ${cfg.name}` };
+            const pr = cur().name || ocProject(''); return { node, title: 'Project Realisme Monitor', subtitle: `${pr ? pr + ' · ' : ''}Inschatting · context ${cfg.name}` };
         }
         async function doExport(kind) {
             if (!lastCalc) { ocToast('Bereken eerst een inschatting'); return; }
             // Bestandsnaam: project-realisme-projectnaam-JJJJ-MM-DD (zonder dubbele datum)
             const d = new Date(), iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-            const pr = (curName || ocProject('')).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50).replace(/-$/, '');
+            const pr = (cur().name || ocProject('')).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50).replace(/-$/, '');
             const name = ['project-realisme', pr, iso].filter(Boolean).join('-');
             ocToast('Bezig…');
             try {
@@ -1366,23 +1390,44 @@ const ocExport = (() => {
             }, 100);
         }
 
-        /* ---------- Bewaren per project (realisme.v1) en doorgeven aan andere tools ----------
-           realisme.v1 = { projects:[{ name, o, m, p, context, voorbeeld?, updated }] }
-           Het project dat in de app actief is (oc.project), opent vanzelf. */
+        /* ---------- Bewaren per project (realisme.v1), met tabbladen, en doorgeven aan andere tools ----------
+           realisme.v1 = { projects:[{ id, name, o, m, p, context, voorbeeld?, updated }], current }
+           Oude data (zonder id en current) blijft laden: elk project krijgt een id, het laatst gewijzigde opent.
+           Het project dat in de app actief is (oc.project), opent vanzelf. Lege tabbladen worden niet bewaard. */
         const STORE_KEY = 'realisme.v1';
-        let store = { projects: [] };
-        let curName = '';
+        const uid = () => Math.random().toString(36).slice(2, 10);
+        let store = { projects: [], current: null };
         const isoDate = workdays => { const d = new Date(); let left = Math.ceil(workdays); while (left > 0) { d.setDate(d.getDate() + 1); const w = d.getDay(); if (w !== 0 && w !== 6) left--; } return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+        const blankProject = name => ({ id: uid(), name: (name || ocProject('Mijn project')).slice(0, 80), o: '', m: '', p: '', context: 'autonomous', updated: 0 });
+        const isEmpty = x => !String(x.o).trim() && !String(x.m).trim() && !String(x.p).trim() && x.context === 'autonomous';
+        const cur = () => store.projects.find(x => x.id === store.current) || store.projects[0];
         function loadStore() {
+            let projects = [], current = null;
             try {
                 const d = JSON.parse(localStorage.getItem(STORE_KEY));
-                if (d && Array.isArray(d.projects)) store.projects = d.projects.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => ({
-                    name: x.name.slice(0, 80), o: String(x.o ?? ''), m: String(x.m ?? ''), p: String(x.p ?? ''),
-                    context: CONTEXTS[x.context] ? x.context : 'autonomous', updated: +x.updated || 0, ...(x.voorbeeld === true ? { voorbeeld: true } : {})
-                }));
+                if (d && Array.isArray(d.projects)) {
+                    const seen = new Set();
+                    projects = d.projects.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => {
+                        let id = typeof x.id === 'string' && x.id ? x.id : uid(); if (seen.has(id)) id = uid(); seen.add(id);
+                        return { id, name: x.name.slice(0, 80), o: String(x.o ?? ''), m: String(x.m ?? ''), p: String(x.p ?? ''),
+                            context: CONTEXTS[x.context] ? x.context : 'autonomous', updated: +x.updated || 0, ...(x.voorbeeld === true ? { voorbeeld: true } : {}) };
+                    });
+                    if (projects.some(x => x.id === d.current)) current = d.current;
+                    else if (projects.length) current = projects.slice().sort((p, q) => q.updated - p.updated)[0].id;   // oud formaat: het laatst gewijzigde
+                }
             } catch (e) {}
+            if (!projects.length) { const p = blankProject(); projects = [p]; current = p.id; }
+            store = { projects, current };
         }
-        const entry = name => store.projects.find(x => x.name === name);
+        // Het actieve project uit de app openen. Bestaat het hier nog niet, dan krijgt het een eigen (leeg) tabblad.
+        function followAppProject() {
+            const ap = ocProject(''); if (!ap) return;
+            const m = store.projects.find(x => x.name === ap);
+            if (m) { store.current = m.id; return; }
+            const c = cur();
+            if (store.projects.length === 1 && isEmpty(c) && !c.voorbeeld) { c.name = ap; return; }   // het enige, lege project krijgt die naam
+            const p = blankProject(ap); store.projects.push(p); store.current = p.id;
+        }
         function publish() {
             const lists = store.projects.filter(x => !x.voorbeeld).map(x => {
                 const O = parseFloat(String(x.o).replace(',', '.')), M = parseFloat(String(x.m).replace(',', '.')), P = parseFloat(String(x.p).replace(',', '.'));
@@ -1400,33 +1445,57 @@ const ocExport = (() => {
                 else localStorage.removeItem('oc.share.project-realisme');
             } catch (e) {}
         }
+        function writeStore() {
+            const keep = store.projects.filter(x => !isEmpty(x) || x.voorbeeld);
+            try {
+                if (keep.length) localStorage.setItem(STORE_KEY, JSON.stringify({ projects: keep, current: store.current }));
+                else localStorage.removeItem(STORE_KEY);
+            } catch (err) {}
+            publish();
+        }
+        // De invoer van het open tabblad in het project zetten en bewaren
         function persist() {
             const ids = ['optimistic', 'realistic', 'pessimistic'].map(id => document.getElementById(id).value.trim());
             const context = document.querySelector('input[name="context"]:checked').value;
-            const name = curName.trim() || ocProject('Mijn project');
-            const empty = ids.every(v => v === '') && context === 'autonomous';
-            let e = entry(name);
-            if (empty && !e) return;
-            if (!e) { e = { name }; store.projects.push(e); }
+            const e = cur();
             Object.assign(e, { o: ids[0], m: ids[1], p: ids[2], context, updated: Date.now() });
             if (voorbeeld) e.voorbeeld = true; else delete e.voorbeeld;
-            if (empty) store.projects = store.projects.filter(x => x !== e);
-            try {
-                if (store.projects.length) localStorage.setItem(STORE_KEY, JSON.stringify(store)); else localStorage.removeItem(STORE_KEY);
-            } catch (err) {}
-            publish();
-            renderProjList();
+            writeStore();
+            renderTabs();
         }
-        function renderProjList() {
-            document.getElementById('projList').innerHTML = store.projects.map(x => `<option value="${escHtml(x.name)}">`).join('');
+        function renderTabs() {
+            const el = document.getElementById('projTabs');
+            el.innerHTML = store.projects.map(x => `<button type="button" class="ptab${x.id === store.current ? ' active' : ''}" data-proj="${escHtml(x.id)}"${x.id === store.current ? ' aria-current="true"' : ''}>${escHtml(x.name.trim() || 'Naamloos')}${x.voorbeeld ? '<span class="vb-tag">voorbeeld</span>' : ''}</button>`).join('')
+                + '<button type="button" class="ptab add" id="newProj">+ Project</button>';
+            const many = store.projects.length > 1;
+            document.getElementById('resetLabel').textContent = many ? 'Verwijder dit project' : 'Opnieuw beginnen';
+            document.getElementById('resetBtn').classList.toggle('btn-del', many);
         }
-        function openProject(name) {
-            curName = name;
-            document.getElementById('projName').value = name;
-            const e = entry(name);
-            voorbeeld = !!(e && e.voorbeeld);
-            if (e) setInputs(e.o, e.m, e.p, e.context); else setInputs('', '', '', 'autonomous');
+        function showProject(id) {
+            store.current = id;
+            const e = cur();
+            store.current = e.id;
+            const pn = document.getElementById('projName');
+            if (document.activeElement !== pn) pn.value = e.name;
+            voorbeeld = !!e.voorbeeld;
+            setInputs(e.o, e.m, e.p, e.context);
             calculate(true);
+            renderTabs();
+            requestAnimationFrame(() => { const a = document.querySelector('.ptab.active'); a && a.scrollIntoView({ inline: 'nearest', block: 'nearest' }); });
+        }
+        function switchProject(id) { showProject(id); writeStore(); }
+        function newProject(from) {
+            const p = Object.assign(blankProject('Nieuw project'), from || {}, { id: uid() });
+            store.projects.push(p);
+            switchProject(p.id);
+            if (!from) { const n = document.getElementById('projName'); n.focus(); n.select(); }
+        }
+        // Eén project verwijderen (als er meer zijn): meteen, met Ongedaan
+        function deleteProject(msg) {
+            const snap = JSON.stringify(store), p = cur(), idx = store.projects.indexOf(p);
+            store.projects.splice(idx, 1);
+            switchProject(store.projects[Math.max(0, idx - 1)].id);
+            ocToast(msg || `${p.name.trim() || 'Naamloos'} verwijderd`, () => { store = JSON.parse(snap); switchProject(store.current); ocToast('Teruggezet'); });
         }
 
         // Berekenen: telkens opnieuw zodra de invoer verandert (geen knop nodig)
@@ -1475,11 +1544,17 @@ const ocExport = (() => {
             document.querySelectorAll('.context-option').forEach(o2 => o2.classList.toggle('selected', o2.dataset.context === ctx));
         }
         // Voorbeeld: een nieuw premiereglement uitwerken, met besluitvorming via een stuurgroep
+        const VOORBEELD = { name: 'Voorbeeld: nieuw premiereglement', o: '20', m: '30', p: '60', context: 'governance', voorbeeld: true };
         function loadExample() {
-            // het voorbeeld krijgt een eigen projectnaam, zodat het je eigen schatting niet overschrijft
-            const filled = ['optimistic', 'realistic', 'pessimistic'].some(id => document.getElementById(id).value.trim());
-            if (filled) { curName = 'Voorbeeld: nieuw premiereglement'; document.getElementById('projName').value = curName; }
-            voorbeeld = true; setInputs('20', '30', '60', 'governance'); calculate(); ocToast('Voorbeeld geladen');
+            const ex = store.projects.find(x => x.voorbeeld);
+            if (ex) { switchProject(ex.id); ocToast('Voorbeeld geopend'); return; }
+            // het voorbeeld krijgt een eigen tabblad, zodat het je eigen schatting niet overschrijft
+            if (!isEmpty(cur())) newProject({ ...VOORBEELD });
+            else {
+                const e = cur(); if (['Mijn project', 'Nieuw project', 'Naamloos'].includes(e.name.trim())) { e.name = VOORBEELD.name; document.getElementById('projName').value = e.name; }
+                voorbeeld = true; setInputs(VOORBEELD.o, VOORBEELD.m, VOORBEELD.p, VOORBEELD.context); calculate();
+            }
+            ocToast('Voorbeeld geladen');
         }
 
         function reset() {
@@ -1491,22 +1566,31 @@ const ocExport = (() => {
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
             loadStore();
-            openProject(ocProject('') || (store.projects.slice().sort((a, b) => b.updated - a.updated)[0] || {}).name || 'Mijn project');
-            renderProjList();
+            followAppProject();
+            showProject(store.current);
             const pn = document.getElementById('projName');
+            // De naam hernoemt het open project. Een naam die al bij een ander tabblad hoort, nemen we niet over.
             pn.addEventListener('change', () => {
-                const v = pn.value.trim().slice(0, 80);
-                if (!v) { pn.value = curName; return; }
-                if (v === curName) return;
-                if (entry(v)) { openProject(v); ocToast(`${v} geopend`); return; }   // een bewaard project kiezen
-                const e = entry(curName); if (e) e.name = v;                          // anders: dit project hernoemen
-                curName = v; persist();
+                const e = cur(), v = pn.value.trim().slice(0, 80);
+                if (!v) { pn.value = e.name; return; }
+                if (v === e.name) return;
+                if (store.projects.some(x => x !== e && x.name === v)) { pn.value = e.name; ocToast(`${v} heeft al een eigen tabblad`); return; }
+                e.name = v; persist();
             });
             pn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); pn.blur(); } });
-            window.addEventListener('storage', e => { if (e.key === 'oc.project') { const n = ocProject(''); if (n && n !== curName) { loadStore(); openProject(n); renderProjList(); } } });
-            document.getElementById('resetBtn').addEventListener('click', reset);
+            window.addEventListener('storage', e => { if (e.key === 'oc.project') { const n = ocProject(''); if (n && n !== cur().name) { loadStore(); followAppProject(); showProject(store.current); } } });
+            document.getElementById('projTabs').addEventListener('click', e => {
+                if (e.target.closest('#newProj')) { newProject(); return; }
+                const t = e.target.closest('[data-proj]'); if (t && t.dataset.proj !== store.current) switchProject(t.dataset.proj);
+            });
+            document.getElementById('resetBtn').addEventListener('click', () => { if (store.projects.length > 1) deleteProject(); else reset(); });
             document.getElementById('exampleBtn').addEventListener('click', loadExample);
-            document.getElementById('vbWis').addEventListener('click', () => { reset(); if (curName.startsWith('Voorbeeld')) openProject(ocProject('') || 'Mijn project'); ocToast('Voorbeeld gewist'); });
+            document.getElementById('vbWis').addEventListener('click', () => {
+                if (store.projects.length > 1) { deleteProject('Voorbeeld gewist'); return; }
+                const snap = JSON.stringify(store);
+                reset(); const e = cur(); if (e.name.startsWith('Voorbeeld')) { e.name = ocProject('Mijn project'); showProject(e.id); writeStore(); }
+                ocToast('Voorbeeld gewist', () => { store = JSON.parse(snap); switchProject(store.current); });
+            });
             document.getElementById('vbEigen').addEventListener('click', () => { voorbeeld = false; calculate(); ocToast('Het voorbeeld is nu van jou'); });
             ['optimistic', 'realistic', 'pessimistic'].forEach(id => document.getElementById(id).addEventListener('input', calculate));
             document.querySelectorAll('input[name="context"]').forEach(r => r.addEventListener('change', calculate));

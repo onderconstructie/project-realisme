@@ -12,6 +12,7 @@
     <meta name="oc:kort" content="Hoe lang duurt het echt?">
     <meta name="oc:volgorde" content="90">
     <meta name="oc:traject" content="project:4">
+    <meta name="oc:opslag" content="realisme.v1, oc.share.project-realisme">
 <link rel="stylesheet" href="/fonts/fonts.css">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=&quot;0 0 40 40&quot; fill=&quot;none&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;18&quot; fill=&quot;%23f8fafc&quot; stroke=&quot;%23e2e8f0&quot; stroke-width=&quot;1.5&quot;/%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;10&quot; stroke=&quot;%2364748b&quot; stroke-width=&quot;1.6&quot; fill=&quot;%23fff&quot;/%3E%3Cpath d=&quot;M20 10A10 10 0 0 1 29.5 23.1&quot; stroke=&quot;%2310b981&quot; stroke-width=&quot;3&quot; fill=&quot;none&quot; stroke-linecap=&quot;round&quot;/%3E%3Cpath d=&quot;M20 14v6l3.5 2.2&quot; stroke=&quot;%2364748b&quot; stroke-width=&quot;1.8&quot; fill=&quot;none&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/%3E%3Ccircle cx=&quot;20&quot; cy=&quot;20&quot; r=&quot;1.3&quot; fill=&quot;%2364748b&quot;/%3E%3C/svg%3E">
     <style>
@@ -852,6 +853,13 @@
         input, button, select, textarea { font-family:inherit; }
         .method-item-text code { font-family:inherit; font-variant-numeric:tabular-nums; font-weight:600; }
         .context-meta { font-size:0.75rem; font-weight:600; color:#334155; margin-top:0.25rem; font-variant-numeric:tabular-nums; }
+        /* Per project bewaard */
+        .proj-row { display:flex; align-items:center; gap:0.5rem; margin:0 0 1rem; flex-wrap:wrap; }
+        .proj-row label { font-size:0.8125rem; font-weight:600; color:#475569; }
+        .proj-row input { flex:1 1 10rem; min-width:0; min-height:44px; padding:0 0.75rem; font:inherit; font-size:0.9375rem; font-weight:600; color:#1e293b; background:#fff; border:1.5px solid #e2e8f0; border-radius:10px; }
+        .proj-row input:focus { border-color:#10b981; outline:none; }
+        .proj-row input:focus-visible { outline:2px solid #047857; outline-offset:2px; }
+        .saved-note { font-size:0.75rem; color:#64748b; margin-top:0.5rem; }
     </style>
 </head>
 <body>
@@ -874,6 +882,11 @@
             <div class="left-column">
                 <div class="card card-input">
                     <h2 class="card-title">Invoer</h2>
+                    <div class="proj-row">
+                        <label for="projName">Project</label>
+                        <input type="text" id="projName" list="projList" autocomplete="off" maxlength="80" placeholder="Naam van je project">
+                        <datalist id="projList"></datalist>
+                    </div>
                     <div class="vb-bar" id="vbBar" role="note" hidden>
                         <span class="vb-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Dit is een voorbeeld om de tool te verkennen. Het telt niet mee in andere tools.</span></span>
                         <span class="vb-btns"><button type="button" class="vb-btn vb-wis" id="vbWis">Wis voorbeeld</button><button type="button" class="vb-btn vb-eigen" id="vbEigen">Maak er mijn eigen van</button></span>
@@ -949,6 +962,7 @@
                     </div>
 
                     <p class="calc-hint" id="calcHint" aria-live="polite">Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.</p>
+                    <p class="saved-note" id="savedNote" hidden>Bewaard op dit toestel. De einddatum staat klaar om over te nemen in het Takenbord.</p>
 
                     <button class="btn btn-outline" id="resetBtn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1321,13 +1335,13 @@ const ocExport = (() => {
                     Werkwijze: gewogen verwachting ${fmt(result.mean)} mensdagen (spreiding ${fmt(result.stdDev)}). We rekenen ${SIMULATIONS} mogelijke verlopen door en nemen de werklast die je in ${Math.round(cfg.percentile * 100)}% ervan haalt.
                     De doorlooptijd is de werklast gedeeld door de efficiëntie (${Math.round(cfg.efficiency * 100)}%). Dezelfde invoer geeft altijd dezelfde uitkomst.
                 </div>`;
-            const pr = ocProject(''); return { node, title: 'Project Realisme Monitor', subtitle: `${pr ? pr + ' · ' : ''}Inschatting · context ${cfg.name}` };
+            const pr = curName || ocProject(''); return { node, title: 'Project Realisme Monitor', subtitle: `${pr ? pr + ' · ' : ''}Inschatting · context ${cfg.name}` };
         }
         async function doExport(kind) {
             if (!lastCalc) { ocToast('Bereken eerst een inschatting'); return; }
             // Bestandsnaam: project-realisme-projectnaam-JJJJ-MM-DD (zonder dubbele datum)
             const d = new Date(), iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-            const pr = ocProject('').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50).replace(/-$/, '');
+            const pr = (curName || ocProject('')).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\d{4}-\d{2}-\d{2}/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50).replace(/-$/, '');
             const name = ['project-realisme', pr, iso].filter(Boolean).join('-');
             ocToast('Bezig…');
             try {
@@ -1352,6 +1366,69 @@ const ocExport = (() => {
             }, 100);
         }
 
+        /* ---------- Bewaren per project (realisme.v1) en doorgeven aan andere tools ----------
+           realisme.v1 = { projects:[{ name, o, m, p, context, voorbeeld?, updated }] }
+           Het project dat in de app actief is (oc.project), opent vanzelf. */
+        const STORE_KEY = 'realisme.v1';
+        let store = { projects: [] };
+        let curName = '';
+        const isoDate = workdays => { const d = new Date(); let left = Math.ceil(workdays); while (left > 0) { d.setDate(d.getDate() + 1); const w = d.getDay(); if (w !== 0 && w !== 6) left--; } return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+        function loadStore() {
+            try {
+                const d = JSON.parse(localStorage.getItem(STORE_KEY));
+                if (d && Array.isArray(d.projects)) store.projects = d.projects.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => ({
+                    name: x.name.slice(0, 80), o: String(x.o ?? ''), m: String(x.m ?? ''), p: String(x.p ?? ''),
+                    context: CONTEXTS[x.context] ? x.context : 'autonomous', updated: +x.updated || 0, ...(x.voorbeeld === true ? { voorbeeld: true } : {})
+                }));
+            } catch (e) {}
+        }
+        const entry = name => store.projects.find(x => x.name === name);
+        function publish() {
+            const lists = store.projects.filter(x => !x.voorbeeld).map(x => {
+                const O = parseFloat(String(x.o).replace(',', '.')), M = parseFloat(String(x.m).replace(',', '.')), P = parseFloat(String(x.p).replace(',', '.'));
+                if (!(O > 0 && O < M && M < P)) return null;
+                const r = runSimulation(O, M, P, x.context), when = isoDate(r.duration);
+                return { name: x.name, items: [
+                    { type: 'actie', text: `${x.name} opleveren`, when, note: `${fmt(r.effort)} dagen werk · klaar na ${fmt(r.duration)} werkdagen` },
+                    { type: 'kerncijfer', text: 'realisme.einddatum', note: when },
+                    { type: 'kerncijfer', text: 'realisme.mensdagen', note: String(r.effort) },
+                    { type: 'kerncijfer', text: 'realisme.doorlooptijd', note: String(r.duration) }
+                ] };
+            }).filter(Boolean);
+            try {
+                if (lists.length) localStorage.setItem('oc.share.project-realisme', JSON.stringify({ id: 'project-realisme', tool: 'Project Realisme', updated: Date.now(), lists }));
+                else localStorage.removeItem('oc.share.project-realisme');
+            } catch (e) {}
+        }
+        function persist() {
+            const ids = ['optimistic', 'realistic', 'pessimistic'].map(id => document.getElementById(id).value.trim());
+            const context = document.querySelector('input[name="context"]:checked').value;
+            const name = curName.trim() || ocProject('Mijn project');
+            const empty = ids.every(v => v === '') && context === 'autonomous';
+            let e = entry(name);
+            if (empty && !e) return;
+            if (!e) { e = { name }; store.projects.push(e); }
+            Object.assign(e, { o: ids[0], m: ids[1], p: ids[2], context, updated: Date.now() });
+            if (voorbeeld) e.voorbeeld = true; else delete e.voorbeeld;
+            if (empty) store.projects = store.projects.filter(x => x !== e);
+            try {
+                if (store.projects.length) localStorage.setItem(STORE_KEY, JSON.stringify(store)); else localStorage.removeItem(STORE_KEY);
+            } catch (err) {}
+            publish();
+            renderProjList();
+        }
+        function renderProjList() {
+            document.getElementById('projList').innerHTML = store.projects.map(x => `<option value="${escHtml(x.name)}">`).join('');
+        }
+        function openProject(name) {
+            curName = name;
+            document.getElementById('projName').value = name;
+            const e = entry(name);
+            voorbeeld = !!(e && e.voorbeeld);
+            if (e) setInputs(e.o, e.m, e.p, e.context); else setInputs('', '', '', 'autonomous');
+            calculate(true);
+        }
+
         // Berekenen: telkens opnieuw zodra de invoer verandert (geen knop nodig)
         let voorbeeld = false;
         function hint(msg) { document.getElementById('calcHint').textContent = msg; }
@@ -1362,16 +1439,19 @@ const ocExport = (() => {
             document.getElementById('effortBar').style.width = '0%';
             document.getElementById('durationBar').style.width = '0%';
         }
-        function calculate() {
+        function calculate(noSave) {
+            if (noSave !== true) persist();
             const raw = ['optimistic', 'realistic', 'pessimistic'].map(id => document.getElementById(id).value.trim());
             const [O, M, P] = raw.map(v => parseFloat(v.replace(',', '.')) || 0);
             const context = document.querySelector('input[name="context"]:checked').value;
             document.getElementById('vbBar').hidden = !voorbeeld;
 
+            document.getElementById('savedNote').hidden = true;
             if (raw.some(v => v === '')) { showEmpty(); hint('Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.'); return; }
             if (O <= 0 || M <= 0 || P <= 0) { showEmpty(); hint('Vul drie getallen groter dan 0 in.'); return; }
             if (O >= M || M >= P) { showEmpty(); hint('De volgorde moet kloppen: optimistisch < realistisch < pessimistisch.'); return; }
             hint('');
+            document.getElementById('savedNote').hidden = voorbeeld;
 
             const result = runSimulation(O, M, P, context);
             lastCalc = { O, M, P, context, result, diagnosis: getDiagnosis(result, context) };
@@ -1395,7 +1475,12 @@ const ocExport = (() => {
             document.querySelectorAll('.context-option').forEach(o2 => o2.classList.toggle('selected', o2.dataset.context === ctx));
         }
         // Voorbeeld: een nieuw premiereglement uitwerken, met besluitvorming via een stuurgroep
-        function loadExample() { voorbeeld = true; setInputs('20', '30', '60', 'governance'); calculate(); ocToast('Voorbeeld geladen'); }
+        function loadExample() {
+            // het voorbeeld krijgt een eigen projectnaam, zodat het je eigen schatting niet overschrijft
+            const filled = ['optimistic', 'realistic', 'pessimistic'].some(id => document.getElementById(id).value.trim());
+            if (filled) { curName = 'Voorbeeld: nieuw premiereglement'; document.getElementById('projName').value = curName; }
+            voorbeeld = true; setInputs('20', '30', '60', 'governance'); calculate(); ocToast('Voorbeeld geladen');
+        }
 
         function reset() {
             voorbeeld = false;
@@ -1405,9 +1490,23 @@ const ocExport = (() => {
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
+            loadStore();
+            openProject(ocProject('') || (store.projects.slice().sort((a, b) => b.updated - a.updated)[0] || {}).name || 'Mijn project');
+            renderProjList();
+            const pn = document.getElementById('projName');
+            pn.addEventListener('change', () => {
+                const v = pn.value.trim().slice(0, 80);
+                if (!v) { pn.value = curName; return; }
+                if (v === curName) return;
+                if (entry(v)) { openProject(v); ocToast(`${v} geopend`); return; }   // een bewaard project kiezen
+                const e = entry(curName); if (e) e.name = v;                          // anders: dit project hernoemen
+                curName = v; persist();
+            });
+            pn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); pn.blur(); } });
+            window.addEventListener('storage', e => { if (e.key === 'oc.project') { const n = ocProject(''); if (n && n !== curName) { loadStore(); openProject(n); renderProjList(); } } });
             document.getElementById('resetBtn').addEventListener('click', reset);
             document.getElementById('exampleBtn').addEventListener('click', loadExample);
-            document.getElementById('vbWis').addEventListener('click', () => { reset(); ocToast('Voorbeeld gewist'); });
+            document.getElementById('vbWis').addEventListener('click', () => { reset(); if (curName.startsWith('Voorbeeld')) openProject(ocProject('') || 'Mijn project'); ocToast('Voorbeeld gewist'); });
             document.getElementById('vbEigen').addEventListener('click', () => { voorbeeld = false; calculate(); ocToast('Het voorbeeld is nu van jou'); });
             ['optimistic', 'realistic', 'pessimistic'].forEach(id => document.getElementById(id).addEventListener('input', calculate));
             document.querySelectorAll('input[name="context"]').forEach(r => r.addEventListener('change', calculate));
@@ -1471,7 +1570,7 @@ const ocExport = (() => {
                 el.addEventListener('keydown', e => { if (e.key === 'Escape') hideTooltip(); });
             });
 
-            calculate();
+            calculate(true);
         });
     </script>
 </body>

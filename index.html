@@ -927,6 +927,12 @@ body { min-height:100dvh; }
         .ocw-btn:focus-visible { outline: 2px solid #047857; outline-offset: 2px; }
         .ocb-real { margin: 1.25rem 0 0.75rem; }
 </style>
+<style>
+/* UX-audit (nov 2026) */
+/* invoerkolom iets breder: projectnaam, voorbeeldknoppen en context-kaarten krijgen lucht */
+@media (min-width:901px) { .main-grid { grid-template-columns:clamp(340px, 33vw, 420px) minmax(0, 1fr); } }
+.card-title, .input-item label { font-size:0.75rem; }
+</style>
 </head>
 <body>
     <header class="header oc-head">
@@ -977,7 +983,7 @@ body { min-height:100dvh; }
                                 <input type="number" id="pessimistic" min="0.5" max="9999" step="any" inputmode="decimal" enterkeyhint="next" placeholder="bv. 60">
                             </div>
                         </div>
-                        <div style="font-size: 0.6875rem; color: #047857; font-weight: 500; margin-top: 0.5rem; text-align: center;">
+                        <div style="font-size: 0.75rem; color: #047857; font-weight: 500; margin-top: 0.5rem; text-align: center;">
                             in mensdagen
                         </div>
                     </div>

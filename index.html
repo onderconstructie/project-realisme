@@ -873,6 +873,7 @@
         .cap-row input::placeholder { color:#64748b; }
         .cap-row input:focus { border-color:#10b981; outline:none; }
         .cap-row input:focus-visible { outline:2px solid #047857; outline-offset:2px; }
+        .cap-row input.start-input { width:11rem; font-size:1rem; padding:0 0.625rem; text-align:left; }
         .cap-hint { flex:1 1 10rem; font-size:0.75rem; color:#475569; line-height:1.4; }
         /* Per project: tabbladen (zelfde als Risicomatrix en Project Radar) */
         .proj-tabs { display:flex; gap:0.5rem; overflow-x:auto; scrollbar-width:none; justify-content:safe center; padding:0.125rem 0.25rem 0.25rem; margin:0 0 0.75rem; }
@@ -1163,6 +1164,14 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                         </div>
                     </div>
 
+                    <div class="input-group">
+                        <div class="input-group-title"><label for="startDate">Wanneer start het werk?</label></div>
+                        <div class="cap-row">
+                            <input type="date" id="startDate" class="start-input" aria-describedby="startHint">
+                            <span class="cap-hint" id="startHint">Leeg laten = vandaag. Al gestart? Kies de echte startdatum.</span>
+                        </div>
+                    </div>
+
                     <!-- Context selector -->
                     <div class="input-group">
                         <div class="input-group-title">
@@ -1175,7 +1184,7 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                                 <div class="context-info">
                                     <div class="context-name">Autonoom</div>
                                     <div class="context-desc">Focus op uitvoering, mandaat bij team</div>
-                                    <div class="context-meta">efficiëntie 100% · veilige marge 55%</div>
+                                    <div class="context-meta">efficiëntie 100% · 55% zeker</div>
                                 </div>
                             </label>
                             <label class="context-option" data-context="tactical">
@@ -1184,7 +1193,7 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                                 <div class="context-info">
                                     <div class="context-name">Tactisch</div>
                                     <div class="context-desc">Afstemming met enkele ketenpartners</div>
-                                    <div class="context-meta">efficiëntie 80% · veilige marge 65%</div>
+                                    <div class="context-meta">efficiëntie 80% · 65% zeker</div>
                                 </div>
                             </label>
                             <label class="context-option" data-context="governance">
@@ -1193,7 +1202,7 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                                 <div class="context-info">
                                     <div class="context-name">Bestuurlijk</div>
                                     <div class="context-desc">Besluitvorming via stuurgroepen</div>
-                                    <div class="context-meta">efficiëntie 60% · veilige marge 80%</div>
+                                    <div class="context-meta">efficiëntie 60% · 80% zeker</div>
                                 </div>
                             </label>
                             <label class="context-option" data-context="political">
@@ -1202,7 +1211,7 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                                 <div class="context-info">
                                     <div class="context-name">Politiek</div>
                                     <div class="context-desc">Complexe belangen, procedures domineren</div>
-                                    <div class="context-meta">efficiëntie 40% · veilige marge 85%</div>
+                                    <div class="context-meta">efficiëntie 40% · 85% zeker</div>
                                 </div>
                             </label>
                         </div>
@@ -1273,7 +1282,7 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
 
                             <div class="factor-indicator" id="factorIndicator">
                                 <div class="factor-value" id="factorValue">1×</div>
-                                <div class="factor-label">zo veel langer door wachten en afstemmen</div>
+                                <div class="factor-label" id="factorLabel">zo veel langer door wachten en afstemmen</div>
                                 <div class="factor-end" id="endDate"></div>
                             </div>
                         </div>
@@ -1311,8 +1320,8 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                         <p>Deze tool helpt je de neiging om te optimistisch te plannen in te perken: hij maakt de onzekerheid zichtbaar en rekent de wrijving in een organisatie mee.</p>
                         <ol data-uitleg="stappen">
                             <li><b>Drie-puntenschatting.</b> De drie-puntenschatting weegt het meest waarschijnlijke scenario het zwaarst. Gemiddelde: <code>μ = (O + 4M + P) / 6</code> en standaardafwijking: <code>σ = (P - O) / 6</code></li>
-                            <li><b>Veilige marge.</b> We rekenen 2000 mogelijke verlopen door rond de gewogen verwachting. Afhankelijk van de context nemen we de werklast die je in 55% van die verlopen haalt (autonome teams: een lichte correctie voor te veel optimisme) tot 85% (politieke context). Dezelfde invoer geeft altijd dezelfde uitkomst.</li>
-                            <li><b>Efficiëntiefactor.</b> Eerst delen we de werklast door het aantal voltijdse mensen. Dat delen we door de efficiëntie (40% tot 100%). Zo tellen wachttijd, afstemming en besluitvorming mee. De einddatum telt werkdagen vanaf vandaag (maandag tot vrijdag). Feestdagen en verlof tellen niet mee: hou daar zelf rekening mee.</li>
+                            <li><b>Zekerheid.</b> We rekenen 2000 mogelijke verlopen door rond de gewogen verwachting. Afhankelijk van de context nemen we de werklast die je in 55% van die verlopen haalt (autonome teams: een lichte correctie voor te veel optimisme) tot 85% (politieke context). Dezelfde invoer geeft altijd dezelfde uitkomst.</li>
+                            <li><b>Efficiëntiefactor.</b> Eerst delen we de werklast door het aantal voltijdse mensen. Dat delen we door de efficiëntie (40% tot 100%). Zo tellen wachttijd, afstemming en besluitvorming mee. De einddatum telt werkdagen vanaf de startdatum (leeg is vandaag): maandag tot vrijdag, zonder de wettelijke feestdagen. Verlof rekent de tool niet: hou daar zelf rekening mee.</li>
                         </ol>
                         <p data-uitleg="stil">Alle berekeningen vinden plaats in je browser. Er wordt geen data verzonden.</p>
                     </div>
@@ -1429,14 +1438,14 @@ const ocExport = (() => {
   return { png, pdf };
 })();
 
-        // Instellingen per context: efficiëntie en de veilige marge (hoe zeker je de werklast haalt)
+        // Instellingen per context: efficiëntie en de zekerheid (in hoeveel procent van de verlopen je de werklast haalt)
         const CONTEXTS = {
             autonomous: { efficiency: 1.00, percentile: 0.55, name: 'Autonoom' },
             tactical:   { efficiency: 0.80, percentile: 0.65, name: 'Tactisch' },
             governance: { efficiency: 0.60, percentile: 0.80, name: 'Bestuurlijk' },
             political:  { efficiency: 0.40, percentile: 0.85, name: 'Politiek' }
         };
-        const zeker = cfg => `${Math.round(cfg.percentile * 100)}% zekerheid`;
+        const zeker = cfg => `${Math.round(cfg.percentile * 100)}% zeker`;
 
         const SIMULATIONS = 2000;
 
@@ -1487,12 +1496,13 @@ const ocExport = (() => {
             const config = CONTEXTS[context];
             const wacht = Math.round((1 - config.efficiency) * 100);
             const diagnoses = {
-                autonomous: `Je team beslist zelf, dus het werk loopt bijna zonder wachten. De tool neemt een kleine marge voor tegenvallers (${zeker(config)}). Volg de planning elke week op: loopt iets uit, dan merk je het snel.`,
+                autonomous: `Je team beslist zelf, dus de tool rekent geen tijd voor wachten. Wel een kleine marge voor tegenvallers (${zeker(config)}). Volg de planning elke week op: loopt iets uit, dan merk je het snel.`,
                 tactical: `Je stemt af met enkele partners. Ongeveer ${wacht}% van de kalendertijd gaat naar wachten en overleggen. De tool neemt een gewone marge (${zeker(config)}). Spreek vooraf af hoe snel partners reageren.`,
                 governance: `Beslissingen gaan langs een stuurgroep. Ongeveer ${wacht}% van de kalendertijd gaat naar wachten en afstemmen. De tool neemt een ruime marge (${zeker(config)}). Zet de vergaderdata van de stuurgroep nu al in je planning.`,
                 political: `Er spelen veel belangen en procedures. Maar ${100 - wacht}% van de tijd is echt werk, de rest is wachten op beslissingen en adviezen. De tool neemt de grootste marge (${zeker(config)}). Zeg dit vooraf eerlijk aan je opdrachtgever en de betrokkenen.`
             };
             let t = diagnoses[context];
+            if (result.cap >= 3) t += ` Met ${fmt(result.cap)} mensen gaat het zelden evenredig sneller: niet alles kan tegelijk, en samenwerken kost ook tijd.`;
             // grote spreiding: het slechtste geval is minstens drie keer het beste
             if (O > 0 && P / O >= 3) t += ` Let op: je schattingen liggen ver uit elkaar (het slechtste geval is ${fmt(Math.round(P / O * 10) / 10)} keer het beste). Zoek uit waar die onzekerheid zit, of deel het werk op in kleinere stukken.`;
             return t;
@@ -1540,15 +1550,41 @@ const ocExport = (() => {
         const escHtml = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
         const fmt = n => Number(n).toLocaleString('nl-BE', { maximumFractionDigits: 1 });
         function ocProject(fb) { try { const p = JSON.parse(localStorage.getItem('oc.project')); return p && typeof p.name === 'string' && p.name.trim() ? p.name.trim().slice(0, 80) : fb; } catch { return fb; } }
-        // Einddatum: zoveel werkdagen (ma-vr) vanaf vandaag
-        function endDate(workdays) {
-            const d = new Date(); let left = Math.ceil(workdays);
-            while (left > 0) { d.setDate(d.getDate() + 1); const w = d.getDay(); if (w !== 0 && w !== 6) left--; }
-            return d.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        /* Einddatum: de startdag telt mee als eerste werkdag. Werkdagen zijn maandag tot vrijdag,
+           zonder de tien wettelijke feestdagen in België. Verlof telt niet mee. */
+        const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const feestCache = {};
+        function feestdagen(y) {
+            if (feestCache[y]) return feestCache[y];
+            // paaszondag (gregoriaanse kalender)
+            const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+                g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4,
+                l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+                maand = Math.floor((h + l - 7 * m + 114) / 31), dag = ((h + l - 7 * m + 114) % 31) + 1;
+            const pasen = new Date(y, maand - 1, dag), na = n => { const x = new Date(pasen); x.setDate(x.getDate() + n); return iso(x); };
+            return (feestCache[y] = new Set([`${y}-01-01`, na(1), `${y}-05-01`, na(39), na(50), `${y}-07-21`, `${y}-08-15`, `${y}-11-01`, `${y}-11-11`, `${y}-12-25`]));
+        }
+        const werkdag = d => d.getDay() !== 0 && d.getDay() !== 6 && !feestdagen(d.getFullYear()).has(iso(d));
+        const startOf = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '')); const d = m ? new Date(+m[1], m[2] - 1, +m[3]) : new Date(); d.setHours(12, 0, 0, 0); return d; };
+        function endDay(workdays, start) {
+            const d = startOf(start); let left = Math.max(1, Math.ceil(workdays));
+            while (!werkdag(d)) d.setDate(d.getDate() + 1);
+            left--;
+            while (left > 0) { d.setDate(d.getDate() + 1); if (werkdag(d)) left--; }
+            return d;
+        }
+        const longDate = d => d.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        function endDate(workdays, start) { return longDate(endDay(workdays, start)); }
+        // De zin onder de factor: vanaf vandaag of vanaf de gekozen startdatum
+        function endSentence(workdays, start) {
+            const s = /^\d{4}-\d{2}-\d{2}$/.test(String(start || '')) ? start : '';
+            const eind = endDate(workdays, s);
+            if (!s || s === iso(new Date())) return `Start je vandaag, dan ben je klaar rond ${eind}.`;
+            return `Start op ${startOf(s).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long', year: 'numeric' })}: klaar rond ${eind}.`;
         }
         const durBg = (effort, duration) => { const g = (effort / duration * 100).toFixed(1); return `linear-gradient(90deg, #10b981 0 ${g}%, transparent ${g}%), repeating-linear-gradient(135deg, #cbd5e1 0 5px, #e2e8f0 5px 10px)`; };
         function buildExport() {
-            const { O, M, P, context, result, diagnosis } = lastCalc;
+            const { O, M, P, context, result, diagnosis, start } = lastCalc;
             const capTxt = result.cap === 1 ? '1 voltijdse persoon' : `${fmt(result.cap)} voltijdse mensen`;
             const cfg = CONTEXTS[context];
             const max = Math.max(result.workdays, result.duration);
@@ -1574,7 +1610,7 @@ const ocExport = (() => {
                         <span>Wie werkt eraan: <strong style="color:#1e293b">${capTxt}</strong></span>
                         <span>Organisatorische context: <strong style="color:#1e293b">${escHtml(cfg.name)}</strong></span>
                         <span>Efficiëntie: <strong style="color:#1e293b">${Math.round(cfg.efficiency * 100)}%</strong></span>
-                        <span>Veilige marge: <strong style="color:#1e293b">${zeker(cfg)}</strong></span>
+                        <span>Zekerheid: <strong style="color:#1e293b">${zeker(cfg)}</strong></span>
                     </div>
                 </div>
                 <div data-oc-keep>
@@ -1583,7 +1619,7 @@ const ocExport = (() => {
                     ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#334155', 'Groen: werk · grijs: wachten en afstemmen', `linear-gradient(90deg, #10b981 0 ${(result.workdays / result.duration * 100).toFixed(1)}%, #cbd5e1 ${(result.workdays / result.duration * 100).toFixed(1)}%)`)}
                     <div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:10px;padding:12px 16px;margin:6px 0 22px">
                         <span style="font-size:26px;font-weight:700;color:#1e293b">${fmt(result.factor)}×</span>
-                        <span style="font-size:13px;color:#64748b">zo veel langer door wachten en afstemmen · start je vandaag, dan ben je klaar rond ${escHtml(endDate(result.duration))}</span>
+                        <span style="font-size:13px;color:#64748b">${result.factor > 1 ? 'zo veel langer door wachten en afstemmen' : 'geen extra tijd voor wachten en afstemmen'} · ${escHtml(endSentence(result.duration, start))}</span>
                     </div>
                 </div>
                 <div data-oc-keep>
@@ -1592,7 +1628,7 @@ const ocExport = (() => {
                 </div>
                 <div data-oc-keep style="font-size:12px;line-height:1.55;color:#64748b;border-top:1px solid #f1f5f9;padding-top:12px">
                     Werkwijze: gewogen verwachting ${fmt(result.mean)} mensdagen (spreiding ${fmt(result.stdDev)}). We rekenen ${SIMULATIONS} mogelijke verlopen door en nemen de werklast die je in ${Math.round(cfg.percentile * 100)}% ervan haalt.
-                    De doorlooptijd is de werklast gedeeld door ${capTxt} en door de efficiëntie (${Math.round(cfg.efficiency * 100)}%). Feestdagen en verlof tellen niet mee. Dezelfde invoer geeft altijd dezelfde uitkomst.
+                    De doorlooptijd is de werklast gedeeld door ${capTxt} en door de efficiëntie (${Math.round(cfg.efficiency * 100)}%). Werkdagen zijn maandag tot vrijdag zonder wettelijke feestdagen; verlof telt niet mee. Dezelfde invoer geeft altijd dezelfde uitkomst.
                 </div>`;
             const pr = cur().name || ocProject(''); return { node, title: 'Project Realisme Monitor', subtitle: `${pr ? pr + ' · ' : ''}Inschatting · context ${cfg.name}` };
         }
@@ -1626,15 +1662,16 @@ const ocExport = (() => {
         }
 
         /* ---------- Bewaren per project (realisme.v1), met tabbladen, en doorgeven aan andere tools ----------
-           realisme.v1 = { projects:[{ id, name, o, m, p, cap?, context, voorbeeld?, updated }], current }  (cap = voltijdse mensen; ontbreekt = 1)
+           realisme.v1 = { projects:[{ id, name, o, m, p, cap?, start?, context, voorbeeld?, updated }], current }  (cap = voltijdse mensen; ontbreekt = 1; start = JJJJ-MM-DD; ontbreekt = vandaag)
            Oude data (zonder id en current) blijft laden: elk project krijgt een id, het laatst gewijzigde opent.
            Het project dat in de app actief is (oc.project), opent vanzelf. Lege tabbladen worden niet bewaard. */
         const STORE_KEY = 'realisme.v1';
         const uid = () => Math.random().toString(36).slice(2, 10);
         let store = { projects: [], current: null };
-        const isoDate = workdays => { const d = new Date(); let left = Math.ceil(workdays); while (left > 0) { d.setDate(d.getDate() + 1); const w = d.getDay(); if (w !== 0 && w !== 6) left--; } return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-        const blankProject = name => ({ id: uid(), name: (name || ocProject('Mijn project')).slice(0, 80), o: '', m: '', p: '', cap: '', context: 'autonomous', updated: 0 });
-        const isEmpty = x => !String(x.o).trim() && !String(x.m).trim() && !String(x.p).trim() && !String(x.cap || '').trim() && x.context === 'autonomous';
+        const isoDate = (workdays, start) => iso(endDay(workdays, start));
+        const blankProject = name => ({ id: uid(), name: (name || ocProject('Mijn project')).slice(0, 80), o: '', m: '', p: '', cap: '', start: '', context: 'autonomous', updated: 0 });
+        const isEmpty = x => !String(x.o).trim() && !String(x.m).trim() && !String(x.p).trim() && !String(x.cap || '').trim() && !x.start && x.context === 'autonomous';
+        const cleanStart = v => /^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) && !isNaN(new Date(v)) ? String(v) : '';
         // voltijdse mensen: leeg of ongeldig = 1 (zo rekende de tool vroeger altijd)
         const capOf = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return n > 0 ? Math.min(n, 99) : 1; };
         const cur = () => store.projects.find(x => x.id === store.current) || store.projects[0];
@@ -1646,7 +1683,7 @@ const ocExport = (() => {
                     const seen = new Set();
                     projects = d.projects.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => {
                         let id = typeof x.id === 'string' && x.id ? x.id : uid(); if (seen.has(id)) id = uid(); seen.add(id);
-                        return { id, name: x.name.slice(0, 80), o: String(x.o ?? ''), m: String(x.m ?? ''), p: String(x.p ?? ''), cap: String(x.cap ?? ''),
+                        return { id, name: x.name.slice(0, 80), o: String(x.o ?? ''), m: String(x.m ?? ''), p: String(x.p ?? ''), cap: String(x.cap ?? ''), start: cleanStart(x.start),
                             context: CONTEXTS[x.context] ? x.context : 'autonomous', updated: +x.updated || 0, ...(x.voorbeeld === true ? { voorbeeld: true } : {}) };
                     });
                     if (projects.some(x => x.id === d.current)) current = d.current;
@@ -1669,7 +1706,7 @@ const ocExport = (() => {
             const lists = store.projects.filter(x => !x.voorbeeld).map(x => {
                 const O = parseFloat(String(x.o).replace(',', '.')), M = parseFloat(String(x.m).replace(',', '.')), P = parseFloat(String(x.p).replace(',', '.'));
                 if (!(O > 0 && O <= M && M <= P)) return null;
-                const r = runSimulation(O, M, P, x.context, capOf(x.cap)), when = isoDate(r.duration);
+                const r = runSimulation(O, M, P, x.context, capOf(x.cap)), when = isoDate(r.duration, x.start);
                 return { name: x.name, items: [
                     { type: 'actie', text: `${x.name} opleveren`, when, note: `${fmt(r.effort)} dagen werk · klaar na ${fmt(r.duration)} werkdagen` },
                     { type: 'kerncijfer', text: 'realisme.einddatum', note: when },
@@ -1695,7 +1732,7 @@ const ocExport = (() => {
             const ids = ['optimistic', 'realistic', 'pessimistic', 'capacity'].map(id => document.getElementById(id).value.trim());
             const context = document.querySelector('input[name="context"]:checked').value;
             const e = cur();
-            Object.assign(e, { o: ids[0], m: ids[1], p: ids[2], cap: ids[3], context, updated: Date.now() });
+            Object.assign(e, { o: ids[0], m: ids[1], p: ids[2], cap: ids[3], start: cleanStart(document.getElementById('startDate').value), context, updated: Date.now() });
             if (voorbeeld) e.voorbeeld = true; else delete e.voorbeeld;
             writeStore();
             renderTabs();
@@ -1714,7 +1751,7 @@ const ocExport = (() => {
             const pn = document.getElementById('projName');
             if (document.activeElement !== pn) pn.value = e.name;
             voorbeeld = !!e.voorbeeld;
-            setInputs(e.o, e.m, e.p, e.context, e.cap);
+            setInputs(e.o, e.m, e.p, e.context, e.cap, e.start);
             calculate(true);
             renderTabs();
             requestAnimationFrame(() => { const a = document.querySelector('.ptab.active'); a && a.scrollIntoView({ inline: 'nearest', block: 'nearest' }); });
@@ -1760,23 +1797,26 @@ const ocExport = (() => {
             document.getElementById('savedNote').hidden = voorbeeld;
 
             const result = runSimulation(O, M, P, context, capOf(document.getElementById('capacity').value));
-            lastCalc = { O, M, P, context, result, diagnosis: getDiagnosis(result, context, O, P) };
+            const start = cleanStart(document.getElementById('startDate').value);
+            lastCalc = { O, M, P, context, result, start, diagnosis: getDiagnosis(result, context, O, P) };
 
             const first = document.getElementById('resultsContent').style.display === 'none';
             document.getElementById('emptyState').style.display = 'none';
             document.getElementById('resultsContent').style.display = 'block';
             document.getElementById('resultTitle').textContent = 'Resultaat';
-            document.getElementById('resultSubtitle').textContent = `Context: ${result.context.name} · veilige marge ${zeker(result.context)}`;
+            document.getElementById('resultSubtitle').textContent = `Context: ${result.context.name} · ${zeker(result.context)} dat deze werklast volstaat`;
             if (first) { document.getElementById('effortBar').style.width = '0%'; document.getElementById('durationBar').style.width = '0%'; }
             animateBars(result.effort, result.duration, result.workdays);
             document.getElementById('effortDesc').textContent = result.cap === 1 ? 'Netto werktijd nodig om het project af te ronden'
                 : `Met ${fmt(result.cap)} voltijdse mensen is dat ${fmt(result.workdays)} werkdagen werk`;
             document.getElementById('factorValue').textContent = fmt(result.factor) + '×';
-            document.getElementById('endDate').textContent = `Start je vandaag, dan ben je klaar rond ${endDate(result.duration)}.`;
+            document.getElementById('factorLabel').textContent = result.factor > 1 ? 'zo veel langer door wachten en afstemmen' : 'geen extra tijd voor wachten en afstemmen';
+            document.getElementById('endDate').textContent = endSentence(result.duration, start);
             document.getElementById('diagnosisText').textContent = lastCalc.diagnosis;
         }
-        function setInputs(o, m, p, ctx, cap) {
+        function setInputs(o, m, p, ctx, cap, start) {
             document.getElementById('capacity').value = cap || '';
+            document.getElementById('startDate').value = start || '';
             document.getElementById('optimistic').value = o;
             document.getElementById('realistic').value = m;
             document.getElementById('pessimistic').value = p;
@@ -1814,7 +1854,7 @@ const ocExport = (() => {
         }
         function reset() {
             voorbeeld = false;
-            setInputs('', '', '', 'autonomous', '');
+            setInputs('', '', '', 'autonomous', '', '');
             calculate();
         }
 
@@ -1862,6 +1902,7 @@ const ocExport = (() => {
             });
             document.getElementById('vbEigen').addEventListener('click', () => { voorbeeld = false; calculate(); ocToast('Het voorbeeld is nu van jou'); });
             ['optimistic', 'realistic', 'pessimistic', 'capacity'].forEach(id => document.getElementById(id).addEventListener('input', calculate));
+            document.getElementById('startDate').addEventListener('change', calculate);
             document.querySelectorAll('input[name="context"]').forEach(r => r.addEventListener('change', calculate));
             document.getElementById('exportPng').addEventListener('click', () => doExport('png'));
             document.getElementById('exportPdf').addEventListener('click', () => doExport('pdf'));
@@ -1902,7 +1943,7 @@ const ocExport = (() => {
             document.getElementById('schattingHelp').addEventListener('mouseleave', hideTooltip);
 
             document.getElementById('contextHelp').addEventListener('mouseenter', e => {
-                showTooltip(e.target, 'De organisatorische context bepaalt twee dingen: (1) hoeveel van je tijd echt productief is (efficiëntie), en (2) hoeveel zekerheidsmarge de tool hanteert (risicoprofiel). Hoe politieker de context, hoe meer buffer wordt ingebouwd.');
+                showTooltip(e.target, 'De context bepaalt twee dingen. Efficiëntie: welk deel van de kalendertijd echt werk is, de rest is wachten en afstemmen. Zekerheid: hoe zeker je de werklast wil halen. Hoe meer partijen meebeslissen, hoe meer tijd en zekerheid de tool rekent.');
             });
             document.getElementById('contextHelp').addEventListener('mouseleave', hideTooltip);
             // uitleg ook bij focus en tikken

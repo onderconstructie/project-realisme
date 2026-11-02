@@ -841,6 +841,9 @@
         .factor-end { font-size:0.875rem; color:#334155; font-weight:600; margin-top:0.5rem; }
         .calc-hint { font-size:0.8125rem; color:#475569; margin:0 0 0.75rem; min-height:1.2em; }
         .calc-hint:empty { display:none; }
+        .order-warn { margin:0.5rem 0 0; padding:0.5rem 0.75rem; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:0.8125rem; text-align:center; }
+        .order-warn[hidden] { display:none; }
+        .three-inputs input[aria-invalid="true"] { border-color:#d97706; }
         .ex-btn { width:auto; margin-top:1.25rem; padding:0.625rem 1.125rem; color:#047857; border-color:#a7f3d0; }
         .ex-btn:hover { background:#ecfdf5; border-color:#047857; color:#047857; }
         .vb-bar { display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem 0.75rem; margin:0 0 1rem; padding:0.5rem 0.5rem 0.5rem 0.75rem; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; font-size:0.875rem; line-height:1.4; color:#78350f; }
@@ -867,6 +870,7 @@
         .proj-row input:focus { border-color:#10b981; outline:none; }
         .proj-row input:focus-visible { outline:2px solid #047857; outline-offset:2px; }
         .saved-note { font-size:0.75rem; color:#64748b; margin-top:0.5rem; }
+        .saved-note a { color:#047857; font-weight:600; text-underline-offset:2px; }
         /* Wie werkt eraan: voltijdse mensen */
         .cap-row { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
         .cap-row input { width:6.5rem; min-height:44px; padding:0 0.5rem; font:inherit; font-size:1.125rem; font-weight:600; color:#1e293b; text-align:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; font-variant-numeric:tabular-nums; }
@@ -1140,26 +1144,27 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                         <div class="three-inputs">
                             <div class="input-item optimistic">
                                 <label for="optimistic">Optimistisch</label>
-                                <input type="number" id="optimistic" min="0.5" max="9999" step="any" inputmode="decimal" enterkeyhint="next" placeholder="bv. 20">
+                                <input type="text" id="optimistic" inputmode="decimal" maxlength="7" autocomplete="off" enterkeyhint="next" placeholder="bv. 20" aria-describedby="orderWarn">
                             </div>
                             <div class="input-item realistic">
                                 <label for="realistic">Realistisch</label>
-                                <input type="number" id="realistic" min="0.5" max="9999" step="any" inputmode="decimal" enterkeyhint="next" placeholder="bv. 30">
+                                <input type="text" id="realistic" inputmode="decimal" maxlength="7" autocomplete="off" enterkeyhint="next" placeholder="bv. 30" aria-describedby="orderWarn">
                             </div>
                             <div class="input-item pessimistic">
                                 <label for="pessimistic">Pessimistisch</label>
-                                <input type="number" id="pessimistic" min="0.5" max="9999" step="any" inputmode="decimal" enterkeyhint="next" placeholder="bv. 60">
+                                <input type="text" id="pessimistic" inputmode="decimal" maxlength="7" autocomplete="off" enterkeyhint="next" placeholder="bv. 60" aria-describedby="orderWarn">
                             </div>
                         </div>
                         <div style="font-size: 0.75rem; color: #047857; font-weight: 500; margin-top: 0.5rem; text-align: center;">
                             in mensdagen
                         </div>
+                        <p class="order-warn" id="orderWarn" role="alert" hidden></p>
                     </div>
 
                     <div class="input-group">
                         <div class="input-group-title"><label for="capacity">Wie werkt eraan?</label></div>
                         <div class="cap-row">
-                            <input type="number" id="capacity" min="0.1" max="99" step="any" inputmode="decimal" enterkeyhint="done" placeholder="1" aria-describedby="capHint">
+                            <input type="text" id="capacity" inputmode="decimal" maxlength="5" autocomplete="off" enterkeyhint="done" placeholder="1" aria-describedby="capHint">
                             <span class="cap-hint" id="capHint">Aantal voltijdse mensen. Bv. 1,5 als één persoon voltijds en één halftijds werkt.</span>
                         </div>
                     </div>
@@ -1218,7 +1223,7 @@ details.explain.oc-u .oc-u-noot a:hover { text-decoration-color:var(--u-donker);
                     </div>
 
                     <p class="calc-hint" id="calcHint" aria-live="polite">Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.</p>
-                    <p class="saved-note" id="savedNote" hidden>Bewaard op dit toestel. De einddatum staat klaar om over te nemen in het Takenbord.</p>
+                    <p class="saved-note" id="savedNote" hidden>Bewaard op dit toestel. De einddatum staat klaar om over te nemen in het <a href="../kanban/?van=project-realisme">Takenbord</a>.</p>
 
                 </div>
             </div>
@@ -1790,9 +1795,14 @@ const ocExport = (() => {
             document.getElementById('vbBar').hidden = !voorbeeld;
 
             document.getElementById('savedNote').hidden = true;
+            if (raw.some(v => v === '') || !(O > 0 && M > 0 && P > 0)) { document.getElementById('orderWarn').hidden = true; ['optimistic', 'realistic', 'pessimistic'].forEach(id => document.getElementById(id).removeAttribute('aria-invalid')); }
             if (raw.some(v => v === '')) { showEmpty(); hint('Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.'); return; }
             if (O <= 0 || M <= 0 || P <= 0) { showEmpty(); hint('Vul drie getallen groter dan 0 in.'); return; }
-            if (O > M || M > P) { showEmpty(); hint('Kijk de volgorde na: optimistisch is het kleinste getal, pessimistisch het grootste.'); return; }
+            const wrong = O > M || M > P;
+            const ow = document.getElementById('orderWarn');
+            ow.hidden = !wrong; ow.textContent = wrong ? 'Kijk de volgorde na: optimistisch is het kleinste getal, pessimistisch het grootste.' : '';
+            ['optimistic', 'realistic', 'pessimistic'].forEach((id, i) => document.getElementById(id).setAttribute('aria-invalid', String(wrong && ((i === 0 && O > M) || (i === 1 && (O > M || M > P)) || (i === 2 && M > P)))));
+            if (wrong) { showEmpty(); hint(''); return; }
             hint('');
             document.getElementById('savedNote').hidden = voorbeeld;
 

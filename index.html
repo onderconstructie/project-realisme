@@ -12,7 +12,7 @@
     <meta name="oc:kort" content="Hoe lang duurt het echt?">
     <meta name="oc:volgorde" content="90">
     <meta name="oc:traject" content="project:6">
-    <meta name="oc:opslag" content="realisme.v1">
+    <meta name="oc:opslag" content="realisme.v1, oc.share.project-realisme">
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="preload" href="/fonts/dm-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/dm-sans-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -839,6 +839,12 @@
         .factor-indicator { background:#f8fafc; border:1px solid #e2e8f0; }
         .factor-value { color:#334155; font-variant-numeric:tabular-nums; }
         .factor-end { font-size:0.875rem; color:#334155; font-weight:600; margin-top:0.5rem; }
+        .factor-deadline { font-size:0.8125rem; line-height:1.45; color:#475569; margin-top:0.375rem; }
+        .factor-deadline.krap { color:#b45309; }
+        .from-opdracht { margin-top:0.625rem; padding:0.625rem 0.75rem; border:1px solid #a7f3d0; background:#ecfdf5; border-radius:10px; font-size:0.8125rem; line-height:1.45; color:#065f46; display:grid; gap:0.375rem; justify-items:start; }
+        .from-opdracht b { font-weight:700; }
+        .from-opdracht button { font:inherit; font-size:0.8125rem; font-weight:600; color:#047857; background:#fff; border:1.5px solid #a7f3d0; border-radius:8px; min-height:44px; padding:0.375rem 0.75rem; cursor:pointer; }
+        .from-opdracht button:hover { background:#d1fae5; border-color:#10b981; }
         .calc-hint { font-size:0.8125rem; color:#475569; margin:0 0 0.75rem; min-height:1.2em; }
         .calc-hint:empty { display:none; }
         .order-warn { margin:0.5rem 0 0; padding:0.5rem 0.75rem; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:0.8125rem; text-align:center; }
@@ -1171,6 +1177,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor:pointer; opacity:
                             <input type="text" id="capacity" inputmode="decimal" maxlength="5" autocomplete="off" enterkeyhint="done" placeholder="1" aria-describedby="capHint">
                             <span class="cap-hint" id="capHint">Aantal voltijdse mensen. Bv. 1,5 als één persoon voltijds en één halftijds werkt.</span>
                         </div>
+                        <div class="from-opdracht" id="fromOpdracht" hidden></div>
                     </div>
 
                     <div class="input-group">
@@ -1293,6 +1300,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor:pointer; opacity:
                                 <div class="factor-value" id="factorValue">1×</div>
                                 <div class="factor-label" id="factorLabel">zo veel langer door wachten en afstemmen</div>
                                 <div class="factor-end" id="endDate"></div>
+                                <div class="factor-deadline" id="deadlineCmp" hidden></div>
                             </div>
                         </div>
 
@@ -1834,6 +1842,7 @@ const ocExport = (() => {
             document.getElementById('vbBar').hidden = !voorbeeld;
 
             document.getElementById('savedNote').hidden = true;
+            toonOpdracht(null);
             if (raw.some(v => v === '') || !(O > 0 && M > 0 && P > 0)) { document.getElementById('orderWarn').hidden = true; ['optimistic', 'realistic', 'pessimistic'].forEach(id => document.getElementById(id).removeAttribute('aria-invalid')); }
             if (raw.some(v => v === '')) { showEmpty(); hint('Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.'); return; }
             if (O <= 0 || M <= 0 || P <= 0) { showEmpty(); hint('Vul drie getallen groter dan 0 in.'); return; }
@@ -1861,8 +1870,57 @@ const ocExport = (() => {
             document.getElementById('factorValue').textContent = fmt(result.factor) + '×';
             document.getElementById('factorLabel').textContent = result.factor > 1 ? 'zo veel langer door wachten en afstemmen' : 'geen extra tijd voor wachten en afstemmen';
             document.getElementById('endDate').textContent = endSentence(result.duration, start);
+            toonOpdracht(result, start);
             document.getElementById('diagnosisText').textContent = lastCalc.diagnosis;
         }
+        /* Uit de Projectopdracht van hetzelfde project (dezelfde naam, soepel vergeleken): de einddatum en de inzet van mensen.
+           Alleen als voorstel: de inzet komt pas in het veld als je op de knop tikt, de einddatum is een vergelijkpunt. Nooit stil overschrijven. */
+        const projSleutel = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '').slice(0, 50);
+        function uitOpdracht() {
+            if (voorbeeld) return null;
+            try {
+                const d = JSON.parse(localStorage.getItem('opdracht.v1')), k = projSleutel(cur().name);
+                if (!k || !d || !Array.isArray(d.opdrachten)) return null;
+                const o = d.opdrachten.find(x => x && x.voorbeeld !== true && typeof x.name === 'string' && projSleutel(x.name) === k);
+                if (!o) return null;
+                const eind = typeof o.einddatum === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.einddatum) && !isNaN(new Date(o.einddatum)) ? o.einddatum : '';
+                // "3 voltijds, 15 maanden", "2,5 VTE", "4 mensen" of gewoon "3": het aantal mensen. "15 maanden" alleen is geen inzet.
+                const t = typeof o.mensen === 'string' ? o.mensen.trim() : '';
+                const m = /(\d+(?:[.,]\d+)?)\s*(voltijd|vte|fte|mensen|personen|medewerkers|collega|pers\b|man\b)/i.exec(t) || /^(\d+(?:[.,]\d+)?)$/.exec(t);
+                const cap = m ? parseFloat(m[1].replace(',', '.')) : 0;
+                return { eind, cap: cap > 0 && cap <= 99 ? cap : 0, mensen: t.slice(0, 80) };
+            } catch (e) { return null; }
+        }
+        const kortDatum = v => startOf(v).toLocaleDateString('nl-BE', { day: 'numeric', month: 'long', year: 'numeric' });
+        // Werkdagen tussen twee data (zonder weekends en feestdagen), positief als b later is dan a
+        function werkdagenTussen(a, b) {
+            const s = a <= b ? 1 : -1, d = new Date(a); let n = 0;
+            for (let i = 0; i < 3000 && iso(d) !== iso(b); i++) { d.setDate(d.getDate() + s); if (werkdag(d)) n += s; }
+            return n;
+        }
+        function toonOpdracht(result, start) {
+            const el = document.getElementById('fromOpdracht'), cmp = document.getElementById('deadlineCmp'), o = uitOpdracht();
+            if (!o || (!o.eind && !o.cap)) { el.hidden = true; el.innerHTML = ''; cmp.hidden = true; return; }
+            const capVeld = document.getElementById('capacity').value.trim(), zelfde = o.cap && capVeld !== '' && capOf(capVeld) === o.cap;
+            const mensen = n => `${fmt(n)} voltijdse ${n === 1 ? 'persoon' : 'mensen'}`;
+            el.innerHTML = `<span><b>Uit je projectopdracht.</b>${o.eind ? ` Klaar tegen ${escHtml(kortDatum(o.eind))}.` : ''}${o.mensen ? ` Inzet: ‘${escHtml(o.mensen)}’.` : ''}</span>`
+                + (o.cap && !zelfde ? `<button type="button" id="useCap">Gebruik ${mensen(o.cap)}</button>` : '');
+            el.hidden = false;
+            if (!result || !o.eind) { cmp.hidden = true; return; }
+            const eind = endDay(result.duration, start), doel = startOf(o.eind), n = werkdagenTussen(eind, doel);
+            cmp.hidden = false; cmp.classList.toggle('krap', n < 0);
+            cmp.textContent = n >= 0 ? `Je projectopdracht mikt op ${kortDatum(o.eind)}. Dat haal je${n ? `, met ${fmt(n)} werkdagen marge` : ', net'}.`
+                : `Je projectopdracht mikt op ${kortDatum(o.eind)}. Dat is ${fmt(-n)} werkdagen te krap.`;
+        }
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#useCap')) return;
+            const o = uitOpdracht(); if (!o || !o.cap) return;
+            const c = document.getElementById('capacity'), voor = c.value;
+            c.value = String(o.cap).replace('.', ',');
+            calculate();
+            ocToast(`Inzet overgenomen uit je projectopdracht: ${fmt(o.cap)}`, () => { c.value = voor; calculate(); });
+            c.focus({ preventScroll: true });
+        });
         function setInputs(o, m, p, ctx, cap, start) {
             document.getElementById('capacity').value = cap || '';
             document.getElementById('startDate').value = start || '';
@@ -1928,6 +1986,7 @@ const ocExport = (() => {
                 e.preventDefault(); const next = all[i + 1];
                 if (next) document.getElementById(next).focus(); else e.target.blur();
             }));
+            window.addEventListener('storage', e => { if (e.key === 'opdracht.v1') calculate(true); });
             window.addEventListener('storage', e => { if (e.key === 'oc.project') { const n = ocProject(''); if (n && n !== cur().name) { loadStore(); followAppProject(); showProject(store.current); } } });
             document.getElementById('projTabs').addEventListener('click', e => {
                 if (e.target.closest('#newProj')) { newProject(); return; }
@@ -2302,19 +2361,36 @@ ocBestandKnoppen({
     try { var mt = document.querySelector('meta[name="oc:opslag"]'), mz = mt && /oc\.share\.([\w-]+)/.exec(mt.content); zelf = mz ? mz[1] : ''; } catch (e) {}
     function esc(v) { return String(v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
     function samenvatting(types) {
-      var tools = [], perType = {}, n = 0, keys = [];
+      var tools = [], perType = {}, n = 0, al = 0, keys = [], gezien = {}, heeft = {};
+      function norm(v) { return String(v || '').normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim().replace(/^[\s.,;:!?·-]+|[\s.,;:!?·-]+$/g, ''); }
       try { for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i)); } catch (e) { return ''; }
+      // Wat de tool al heeft (window.ocHave), telt niet als nieuw
+      try { if (typeof window.ocHave === 'function') (window.ocHave(types) || []).forEach(function (x) { heeft[norm(x)] = 1; }); } catch (e) {}
+      // Zoals de kiezer: elke tekst van elke soort één keer, bij de rijkste bron (notitie, wie, wanneer), dan de grootste lijst, dan de recentste
+      var lijsten = [];
       keys.forEach(function (k) {
         if (!k || k.indexOf('oc.share.') !== 0 || k === 'oc.share.' + zelf) return;
-        try {
-          var d = JSON.parse(localStorage.getItem(k)), m = 0; if (!d || !Array.isArray(d.lists)) return;
-          d.lists.forEach(function (l) { (l && Array.isArray(l.items) ? l.items : []).forEach(function (it) {
-            if (it && types.indexOf(it.type) >= 0 && typeof it.text === 'string') { m++; perType[it.type] = (perType[it.type] || 0) + 1; }
-          }); });
-          if (m) { n += m; tools.push({ naam: String(d.tool || d.id || k.slice(9)), t: +d.updated || 0 }); }
+        try { var d = JSON.parse(localStorage.getItem(k)); if (!d || !Array.isArray(d.lists)) return;
+          d.lists.forEach(function (l) {
+            var its = (l && Array.isArray(l.items) ? l.items : []).filter(function (it) { return it && types.indexOf(it.type) >= 0 && typeof it.text === 'string' && it.text.trim(); });
+            if (its.length) lijsten.push({ naam: String(d.tool || d.id || ''), t: +d.updated || 0, items: its });
+          });
         } catch (e) {}
       });
-      if (!n) return '';
+      var best = {};
+      lijsten.forEach(function (l) { l.items.forEach(function (it) {
+        var s = it.type + '|' + norm(it.text), sc = [(it.note ? 2 : 0) + (it.who ? 1 : 0) + (it.when ? 1 : 0), l.items.length, l.t], e = best[s];
+        var beter = !e; for (var i = 0; !beter && e && i < 3; i++) { if (sc[i] !== e.sc[i]) { beter = sc[i] > e.sc[i]; break; } }
+        if (beter) best[s] = { sc: sc, l: l, type: it.type, tekst: it.text };
+      }); });
+      var perTool = {};
+      Object.keys(best).forEach(function (s) {
+        var b = best[s]; if (heeft[norm(b.tekst)]) { al++; return; }
+        n++; perType[b.type] = (perType[b.type] || 0) + 1;
+        var tl = perTool[b.l.naam] || (perTool[b.l.naam] = { naam: b.l.naam, t: 0 }); tl.t = Math.max(tl.t, b.l.t);
+      });
+      tools = Object.keys(perTool).map(function (k) { return perTool[k]; });
+      if (!n) return al ? 'Alles staat er al' : '';
       tools.sort(function (a, b) { return b.t - a.t; });
       var nm = tools.map(function (x) { return x.naam; }), soort = Object.keys(perType);
       var wat = soort.length === 1 && VEEL[soort[0]] ? n + ' ' + (n === 1 ? EEN[soort[0]] : VEEL[soort[0]]) : n + (n === 1 ? ' punt' : ' punten');

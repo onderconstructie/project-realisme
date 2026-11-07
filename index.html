@@ -1702,7 +1702,17 @@ const ocExport = (() => {
         }
         const escHtml = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
         const fmt = n => Number(n).toLocaleString('nl-BE', { maximumFractionDigits: 1 });
-        function ocProject(fb) { try { const p = JSON.parse(localStorage.getItem('oc.project')); return p && typeof p.name === 'string' && p.name.trim() ? p.name.trim().slice(0, 80) : fb; } catch { return fb; } }
+/* Het actieve project uit de app (oc.project): nieuwe projecten, analyses en lijsten krijgen die naam. */
+function ocProject(fb) { try { const p = JSON.parse(localStorage.getItem('oc.project')); return p && typeof p.name === 'string' && p.name.trim() ? p.name.trim().slice(0, 80) : fb; } catch { return fb; } }
+// Het project kreeg een nieuwe naam (in de app of in een tool): de vorige namen staan in oc.project.oud. Zo vindt elke tool het terug.
+function ocProjectOud() { try { const p = JSON.parse(localStorage.getItem('oc.project')); return p && Array.isArray(p.oud) ? p.oud.filter(x => typeof x === 'string') : []; } catch { return []; } }
+// Koos je in de app een ander project en heeft de tool er nog geen eigen lijst voor (een voorbeeld telt niet), dan geeft ocProjectNieuw die naam terug: begin dan een nieuwe, lege lijst op de manier van de tool.
+// Eén keer per projectkeuze: st.ocSince onthoudt welke keuze (oc.project.since) al verwerkt is. Is de open lijst nog leeg (o.leeg) en heeft ze een standaardnaam, dan krijgt ze de naam (o.noem) en komt er niets bij.
+// o.cur: eigenschap met de open lijst; o.van(u): het project van een lijst (standaard de naam). Leeg project of een standaardnaam in de app: niets.
+function ocProjectNieuw(st, arr, o = {}) { const n = ocProject(''), cur = o.cur || 'current', van = o.van || (x => x.name); if (!n || !st || !Array.isArray(st[arr])) return ''; let s = n; try { const p = JSON.parse(localStorage.getItem('oc.project')); if (p && p.since) s = String(p.since); } catch {} if (st.ocSince === s) return ''; st.ocSince = s; const std = v => window.ocStandaardNaam ? ocStandaardNaam(v) : !String(v || '').trim() || /^((mijn|nieuwe?) )?(project|analyse|lijst|keuze|kaart|ideeënkaart|doelgroep|matrix|plan|groep|team|tabel|informatietabel|log|retro|sprint|scan|proces)( \d+)?$|^naamloos$|^hele organisatie$/i.test(String(v).trim()); if (std(n)) return ''; const oud = ocProjectOud(); if (st[arr].some(x => x && !x.voorbeeld && (van(x) === n || oud.includes(van(x))))) return ''; const c = st[arr].find(x => x && x.id === st[cur]); if (c && !c.voorbeeld && o.leeg && o.leeg(c) && std(van(c))) { if (o.noem) o.noem(c, n); else c.name = n; return ''; } return n; }
+// De app houdt tools open: kies je daar een ander project, dan voert de tool fn() opnieuw uit (openen of nieuw beginnen). Typ je net in deze tool, dan pas bij de volgende focus of als ze weer zichtbaar wordt.
+function ocProjectVolg(fn) { let wacht = false; const typt = () => { const a = document.activeElement; return document.hasFocus() && !!a && (a.isContentEditable || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || (a.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|reset|range|color|file)$/i.test(a.type))); }; const doe = () => { if (!wacht) return; wacht = false; try { fn(); } catch (e) { console.error(e); } }; addEventListener('storage', e => { if (e.key === 'oc.project' && e.newValue !== e.oldValue) { wacht = true; if (!typt()) doe(); } }); addEventListener('focus', doe); document.addEventListener('visibilitychange', doe); }
+function ocPickProject(st, arr, cur = 'current') { const p = ocProject(''); if (!p || !st || !Array.isArray(st[arr])) return; let u = st[arr].find(x => x && x.name === p); if (!u) { const o = ocProjectOud(); u = st[arr].find(x => x && o.includes(x.name)); if (u) u.name = p; } if (u) st[cur] = u.id; }   // open het actieve project uit de app
         /* Einddatum: de startdag telt mee als eerste werkdag. Werkdagen zijn maandag tot vrijdag,
            zonder de tien wettelijke feestdagen in België. Verlof telt niet mee.
            vo = de vrije dagen van de Vlaamse overheid erbij: 11 juli, 2 en 15 november en 26 tot en met 31 december. */
@@ -1842,10 +1852,11 @@ const ocExport = (() => {
         const capOf = v => { const n = getal(v); return n > 0 ? Math.min(n, 99) : 1; };
         const cur = () => store.projects.find(x => x.id === store.current) || store.projects[0];
         function loadStore() {
-            let projects = [], current = null;
+            let projects = [], current = null, since = '';
             try {
                 const d = JSON.parse(localStorage.getItem(STORE_KEY));
                 if (d && Array.isArray(d.projects)) {
+                    if (typeof d.ocSince === 'string') since = d.ocSince;   // welke projectkeuze uit de app al verwerkt is
                     const seen = new Set();
                     projects = d.projects.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => {
                         let id = typeof x.id === 'string' && x.id ? x.id : uid(); if (seen.has(id)) id = uid(); seen.add(id);
@@ -1857,16 +1868,18 @@ const ocExport = (() => {
                 }
             } catch (e) {}
             if (!projects.length) { const p = blankProject(); projects = [p]; current = p.id; }
-            store = { projects, current };
+            store = { projects, current, ...(since ? { ocSince: since } : {}) };
         }
-        // Het actieve project uit de app openen. Bestaat het hier nog niet, dan krijgt het een eigen (leeg) tabblad.
+        // Het actieve project uit de app openen (ook onder een vorige naam). Bestaat het hier nog niet, dan krijgt het een eigen (leeg) tabblad:
+        // één keer per projectkeuze, zoals in de andere tools. Haal je dat tabblad weg, dan komt het niet terug.
         function followAppProject() {
             const ap = ocProject(''); if (!ap) return;
-            const m = store.projects.find(x => x.name === ap);
-            if (m) { store.current = m.id; return; }
+            ocPickProject(store, 'projects');
+            if (store.projects.some(x => x.name === ap)) return;
             const c = cur();
             if (store.projects.length === 1 && isEmpty(c) && !c.voorbeeld) { c.name = ap; return; }   // het enige, lege project krijgt die naam
-            const p = blankProject(ap); store.projects.push(p); store.current = p.id;
+            const n = ocProjectNieuw(store, 'projects', { leeg: isEmpty });
+            if (n) { const p = blankProject(n); store.projects.push(p); store.current = p.id; }
         }
         function publish() {
             const lists = store.projects.filter(x => !x.voorbeeld).map(x => {
@@ -1893,7 +1906,7 @@ const ocExport = (() => {
         function writeStore() {
             const keep = store.projects.filter(x => !isEmpty(x) || x.voorbeeld);
             try {
-                if (keep.length) localStorage.setItem(STORE_KEY, JSON.stringify({ projects: keep, current: store.current }));
+                if (keep.length) localStorage.setItem(STORE_KEY, JSON.stringify({ projects: keep, current: store.current, ...(store.ocSince ? { ocSince: store.ocSince } : {}) }));
                 else localStorage.removeItem(STORE_KEY);
             } catch (err) {}
             publish();
@@ -2135,7 +2148,8 @@ const ocExport = (() => {
                 if (next) document.getElementById(next).focus(); else e.target.blur();
             }));
             window.addEventListener('storage', e => { if (e.key === 'opdracht.v1') calculate(true); });
-            window.addEventListener('storage', e => { if (e.key === 'oc.project') { const n = ocProject(''); if (n && n !== cur().name) { loadStore(); followAppProject(); showProject(store.current); } } });
+            // Open in de app en daar een ander project gekozen: dat project openen of beginnen (typ je net, dan pas daarna).
+            ocProjectVolg(() => { const n = ocProject(''); if (n && n !== cur().name) { loadStore(); followAppProject(); showProject(store.current); } });
             document.getElementById('projTabs').addEventListener('click', e => {
                 if (e.target.closest('#newProj')) { newProject(); return; }
                 const t = e.target.closest('[data-proj]'); if (t && t.dataset.proj !== store.current) switchProject(t.dataset.proj);

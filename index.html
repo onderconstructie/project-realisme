@@ -842,6 +842,7 @@
         .factor-deadline { font-size:0.8125rem; line-height:1.45; color:#475569; margin-top:0.375rem; }
         .factor-deadline.krap { color:#b45309; }
         .from-opdracht { margin-top:0.625rem; padding:0.625rem 0.75rem; border:1px solid #a7f3d0; background:#ecfdf5; border-radius:10px; font-size:0.8125rem; line-height:1.45; color:#065f46; display:grid; gap:0.375rem; justify-items:start; }
+        .from-opdracht[hidden] { display:none; }
         .from-opdracht b { font-weight:700; }
         .from-opdracht button { font:inherit; font-size:0.8125rem; font-weight:600; color:#047857; background:#fff; border:1.5px solid #a7f3d0; border-radius:8px; min-height:44px; padding:0.375rem 0.75rem; cursor:pointer; }
         .from-opdracht button:hover { background:#d1fae5; border-color:#10b981; }
@@ -1243,6 +1244,7 @@ input::placeholder, textarea::placeholder { color:#64748b; opacity:1; }
                     </div>
 
                     <p class="calc-hint" id="calcHint" aria-live="polite">Het resultaat verschijnt zodra de drie schattingen ingevuld zijn.</p>
+                    <p class="sr-only" id="resultLive" aria-live="polite"></p>
                     <p class="saved-note" id="savedNote" hidden>Bewaard op dit toestel. De einddatum staat klaar om over te nemen in het <a href="../kanban/?van=project-realisme">Takenbord</a>.</p>
 
                 </div>
@@ -1307,7 +1309,7 @@ input::placeholder, textarea::placeholder { color:#64748b; opacity:1; }
 
                             <div class="factor-indicator" id="factorIndicator">
                                 <div class="factor-value" id="factorValue">1×</div>
-                                <div class="factor-label" id="factorLabel">zo veel langer door wachten en afstemmen</div>
+                                <div class="factor-label" id="factorLabel">zo lang als het werk alleen, door wachten en afstemmen</div>
                                 <div class="factor-end" id="endDate"></div>
                                 <div class="factor-deadline" id="deadlineCmp" hidden></div>
                             </div>
@@ -1345,9 +1347,9 @@ input::placeholder, textarea::placeholder { color:#64748b; opacity:1; }
                     <div class="inner">
                         <p>Deze tool helpt je de neiging om te optimistisch te plannen in te perken: hij maakt de onzekerheid zichtbaar en rekent de wrijving in een organisatie mee.</p>
                         <ol data-uitleg="stappen">
-                            <li><b>Drie-puntenschatting.</b> De drie-puntenschatting weegt het meest waarschijnlijke scenario het zwaarst. Gemiddelde: <code>μ = (O + 4M + P) / 6</code> en standaardafwijking: <code>σ = (P - O) / 6</code></li>
-                            <li><b>Zekerheid.</b> We rekenen 2000 mogelijke verlopen door rond de gewogen verwachting. Afhankelijk van de context nemen we de werklast die je in 55% van die verlopen haalt (autonome teams: een lichte correctie voor te veel optimisme) tot 85% (politieke context). Dezelfde invoer geeft altijd dezelfde uitkomst.</li>
-                            <li><b>Efficiëntiefactor.</b> Eerst delen we de werklast door het aantal voltijdse mensen. Dat delen we door de efficiëntie (40% tot 100%). Zo tellen wachttijd, afstemming en besluitvorming mee. De einddatum telt werkdagen vanaf de startdatum (leeg is vandaag): maandag tot vrijdag, zonder de wettelijke feestdagen. Verlof rekent de tool niet: hou daar zelf rekening mee.</li>
+                            <li><b>Drie-puntenschatting.</b> De drie-puntenschatting weegt het meest waarschijnlijke scenario het zwaarst. Gemiddelde: <code>μ = (O + 4M + P) / 6</code> en standaardafwijking: <code>σ = (P - O) / 6</code>. Dat werkt alleen als optimistisch en pessimistisch echte uitersten zijn.</li>
+                            <li><b>Zekerheid.</b> Rond die verwachting legt de tool een klokvormige spreiding. Afhankelijk van de context neemt ze de werklast die je in 55 van de 100 gevallen haalt (autonome teams: een lichte correctie voor te veel optimisme) tot 85 van de 100 (politieke context). Dat is geen gemeten kans: het klopt alleen als je schattingen kloppen. Uit onderzoek blijkt dat mensen zelfs hun slechtste geval vaak te gunstig inschatten. Dezelfde invoer geeft altijd dezelfde uitkomst.</li>
+                            <li><b>Efficiëntiefactor.</b> Eerst delen we de werklast door het aantal voltijdse mensen. Dat delen we door de efficiëntie (40% tot 100%). Zo tellen wachttijd, afstemming en besluitvorming mee. Die percentages zijn vuistregels, geen meting. De marge uit stap 2 geldt alleen voor de werklast: het wachten telt als een vaste factor. De einddatum telt werkdagen vanaf de startdatum (leeg is vandaag): maandag tot vrijdag, zonder de wettelijke feestdagen. Verlof rekent de tool niet: hou daar zelf rekening mee.</li>
                         </ol>
                         <p data-uitleg="stil">Alle berekeningen vinden plaats in je browser. Er wordt geen data verzonden.</p>
                     </div>
@@ -1499,45 +1501,31 @@ const ocExport = (() => {
   return { png, pdf };
 })();
 
-        // Instellingen per context: efficiëntie en de zekerheid (in hoeveel procent van de verlopen je de werklast haalt)
+        // Instellingen per context: efficiëntie en de zekerheid (in hoeveel procent van de gevallen je de werklast haalt).
+        // z = hoeveel keer de spreiding je boven de verwachting moet gaan om die zekerheid te halen (klokvormige spreiding).
         const CONTEXTS = {
-            autonomous: { efficiency: 1.00, percentile: 0.55, name: 'Autonoom' },
-            tactical:   { efficiency: 0.80, percentile: 0.65, name: 'Tactisch' },
-            governance: { efficiency: 0.60, percentile: 0.80, name: 'Bestuurlijk' },
-            political:  { efficiency: 0.40, percentile: 0.85, name: 'Politiek' }
+            autonomous: { efficiency: 1.00, percentile: 0.55, z: 0.1257, name: 'Autonoom' },
+            tactical:   { efficiency: 0.80, percentile: 0.65, z: 0.3853, name: 'Tactisch' },
+            governance: { efficiency: 0.60, percentile: 0.80, z: 0.8416, name: 'Bestuurlijk' },
+            political:  { efficiency: 0.40, percentile: 0.85, z: 1.0364, name: 'Politiek' }
         };
+        const isContext = c => typeof c === 'string' && Object.prototype.hasOwnProperty.call(CONTEXTS, c);
         const zeker = cfg => `${Math.round(cfg.percentile * 100)}% zeker`;
+        // Langer dan dit (ruim honderd jaar) rekent de tool niet: zo blijft de pagina vlot, ook bij een tikfout.
+        const MAX_WERKDAGEN = 26000;
+        // Een getal uit een veld: komma of punt, en nooit oneindig
+        const getal = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : NaN; };
 
-        const SIMULATIONS = 2000;
-
-        // Toeval met een vaste startwaarde die uit de invoer volgt: dezelfde invoer geeft altijd dezelfde uitkomst.
-        function seedOf(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
-        function rng(seed) { let a = seed || 1; return () => { a = (a + 0x6D2B79F5) | 0; let x = Math.imul(a ^ (a >>> 15), 1 | a); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
-        // Een getal uit een klokvormige spreiding rond het gemiddelde
-        function normalRandom(rand, mean, stdDev) {
-            let u1 = rand(); const u2 = rand();
-            while (u1 === 0) u1 = rand();
-            return mean + Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2) * stdDev;
-        }
-
-        // Mogelijke verlopen doorrekenen
+        /* De werklast die je met de gekozen zekerheid haalt. Vroeger rekende de tool 2000 toevallige verlopen door;
+           nu rekent ze dezelfde grens exact uit. Zo stijgt de uitkomst altijd mee als een schatting stijgt. */
         function runSimulation(optimistic, realistic, pessimistic, context, cap) {
             cap = cap > 0 ? cap : 1;
             // gewogen verwachting en spreiding uit de drie schattingen
             const mean = (optimistic + 4 * realistic + pessimistic) / 6;
             const stdDev = (pessimistic - optimistic) / 6;
-            const rand = rng(seedOf([optimistic, realistic, pessimistic, context].join('|')));
-
-            const results = [];
-            for (let i = 0; i < SIMULATIONS; i++) {
-                // nooit minder dan de optimistische schatting
-                results.push(Math.max(normalRandom(rand, mean, stdDev), optimistic));
-            }
-            results.sort((a, b) => a - b);
-
-            // de werklast die je in zoveel procent van de verlopen haalt
             const config = CONTEXTS[context];
-            const effort = results[Math.min(Math.floor(config.percentile * SIMULATIONS), SIMULATIONS - 1)];
+            // nooit minder dan de optimistische schatting
+            const effort = Math.max(mean + config.z * stdDev, optimistic);
             const duration = effort / cap / config.efficiency;
 
             return {
@@ -1628,7 +1616,7 @@ const ocExport = (() => {
         const werkdag = d => d.getDay() !== 0 && d.getDay() !== 6 && !feestdagen(d.getFullYear()).has(iso(d));
         const startOf = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '')); const d = m ? new Date(+m[1], m[2] - 1, +m[3]) : new Date(); d.setHours(12, 0, 0, 0); return d; };
         function endDay(workdays, start) {
-            const d = startOf(start); let left = Math.max(1, Math.ceil(workdays));
+            const d = startOf(start); let left = Math.max(1, Math.ceil(Math.min(workdays, MAX_WERKDAGEN)));
             while (!werkdag(d)) d.setDate(d.getDate() + 1);
             left--;
             while (left > 0) { d.setDate(d.getDate() + 1); if (werkdag(d)) left--; }
@@ -1648,7 +1636,7 @@ const ocExport = (() => {
             const { O, M, P, context, result, diagnosis, start } = lastCalc;
             const capTxt = result.cap === 1 ? '1 voltijdse persoon' : `${fmt(result.cap)} voltijdse mensen`;
             const cfg = CONTEXTS[context];
-            const max = Math.max(result.workdays, result.duration);
+            const max = Math.max(result.effort, result.duration);
             const node = document.createElement('div');
             const cell = (label, value, color) => `<div style="flex:1;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;border-left:4px solid ${color}">
                 <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#64748b">${label}</div>
@@ -1658,7 +1646,7 @@ const ocExport = (() => {
                     <span style="font-size:14px;font-weight:600;color:#334155">${label}</span>
                     <span><span style="font-size:24px;font-weight:700;color:${color}">${fmt(value)}</span> <span style="font-size:13px;color:#64748b">${unit}</span></span>
                 </div>
-                <div style="height:18px;background:#f1f5f9;border-radius:9px;overflow:hidden"><div style="height:100%;width:${((unit === 'mensdagen' ? result.workdays : value) / max * 100).toFixed(1)}%;background:${bg || color};border-radius:9px"></div></div>
+                <div style="height:18px;background:#f1f5f9;border-radius:9px;overflow:hidden"><div style="height:100%;width:${(value / max * 100).toFixed(1)}%;background:${bg || color};border-radius:9px"></div></div>
                 <div style="font-size:12px;color:#64748b;margin-top:5px">${desc}</div></div>`;
             const section = t => `<div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;margin:4px 0 10px">${t}</div>`;
             node.innerHTML = `
@@ -1680,7 +1668,7 @@ const ocExport = (() => {
                     ${bar('Doorlooptijd (kalender)', result.duration, 'werkdagen', '#334155', 'Groen: werk · grijs: wachten en afstemmen', `linear-gradient(90deg, #10b981 0 ${(result.workdays / result.duration * 100).toFixed(1)}%, #cbd5e1 ${(result.workdays / result.duration * 100).toFixed(1)}%)`)}
                     <div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border-radius:10px;padding:12px 16px;margin:6px 0 22px">
                         <span style="font-size:26px;font-weight:700;color:#1e293b">${fmt(result.factor)}×</span>
-                        <span style="font-size:13px;color:#64748b">${result.factor > 1 ? 'zo veel langer door wachten en afstemmen' : 'geen extra tijd voor wachten en afstemmen'} · ${escHtml(endSentence(result.duration, start))}</span>
+                        <span style="font-size:13px;color:#64748b">${result.factor > 1 ? 'zo lang als het werk alleen, door wachten en afstemmen' : 'geen extra tijd voor wachten en afstemmen'} · ${escHtml(endSentence(result.duration, start))}</span>
                     </div>
                 </div>
                 <div data-oc-keep>
@@ -1688,8 +1676,8 @@ const ocExport = (() => {
                     <p style="font-size:14px;line-height:1.6;color:#334155;margin:0 0 18px">${escHtml(diagnosis)}</p>
                 </div>
                 <div data-oc-keep style="font-size:12px;line-height:1.55;color:#64748b;border-top:1px solid #f1f5f9;padding-top:12px">
-                    Werkwijze: gewogen verwachting ${fmt(result.mean)} mensdagen (spreiding ${fmt(result.stdDev)}). We rekenen ${SIMULATIONS} mogelijke verlopen door en nemen de werklast die je in ${Math.round(cfg.percentile * 100)}% ervan haalt.
-                    De doorlooptijd is de werklast gedeeld door ${capTxt} en door de efficiëntie (${Math.round(cfg.efficiency * 100)}%). Werkdagen zijn maandag tot vrijdag zonder wettelijke feestdagen; verlof telt niet mee. Dezelfde invoer geeft altijd dezelfde uitkomst.
+                    Werkwijze: gewogen verwachting ${fmt(result.mean)} mensdagen (spreiding ${fmt(result.stdDev)}). De tool neemt de werklast die je in ${Math.round(cfg.percentile * 100)} van de 100 gevallen haalt, als je schattingen kloppen. Dat is geen gemeten kans.
+                    De doorlooptijd is de werklast gedeeld door ${capTxt} en door de efficiëntie (${Math.round(cfg.efficiency * 100)}%). Die efficiëntie is een vuistregel per context. Werkdagen zijn maandag tot vrijdag zonder wettelijke feestdagen. Verlof telt niet mee.
                 </div>`;
             const pr = cur().name || ocProject(''); return { node, title: 'Project Realisme Monitor', subtitle: `${pr ? pr + ' · ' : ''}Inschatting · context ${cfg.name}` };
         }
@@ -1708,8 +1696,9 @@ const ocExport = (() => {
 
         // Animate bars
         function animateBars(effort, duration, workdays) {
-            const maxValue = Math.max(workdays, duration);
-            const effortPercent = (workdays / maxValue) * 100;
+            // elke balk zo lang als het getal erboven (het groene deel van de doorlooptijd is de werktijd in werkdagen)
+            const maxValue = Math.max(effort, duration);
+            const effortPercent = (effort / maxValue) * 100;
             const durationPercent = (duration / maxValue) * 100;
 
             document.getElementById('effortValue').textContent = fmt(effort);
@@ -1745,7 +1734,7 @@ const ocExport = (() => {
                     projects = d.projects.filter(x => x && typeof x.name === 'string' && x.name.trim()).map(x => {
                         let id = typeof x.id === 'string' && x.id ? x.id : uid(); if (seen.has(id)) id = uid(); seen.add(id);
                         return { id, name: x.name.slice(0, 80), o: String(x.o ?? ''), m: String(x.m ?? ''), p: String(x.p ?? ''), cap: String(x.cap ?? ''), start: cleanStart(x.start),
-                            context: CONTEXTS[x.context] ? x.context : 'autonomous', updated: +x.updated || 0, ...(x.voorbeeld === true ? { voorbeeld: true } : {}) };
+                            context: isContext(x.context) ? x.context : 'autonomous', updated: +x.updated || 0, ...(x.voorbeeld === true ? { voorbeeld: true } : {}) };
                     });
                     if (projects.some(x => x.id === d.current)) current = d.current;
                     else if (projects.length) current = projects.slice().sort((p, q) => q.updated - p.updated)[0].id;   // oud formaat: het laatst gewijzigde
@@ -1765,11 +1754,13 @@ const ocExport = (() => {
         }
         function publish() {
             const lists = store.projects.filter(x => !x.voorbeeld).map(x => {
-                const O = parseFloat(String(x.o).replace(',', '.')), M = parseFloat(String(x.m).replace(',', '.')), P = parseFloat(String(x.p).replace(',', '.'));
+                const O = getal(x.o), M = getal(x.m), P = getal(x.p);
                 if (!(O > 0 && O <= M && M <= P)) return null;
-                const r = runSimulation(O, M, P, x.context, capOf(x.cap)), when = isoDate(r.duration, x.start);
+                const r = runSimulation(O, M, P, x.context, capOf(x.cap));
+                if (!(r.duration <= MAX_WERKDAGEN)) return null;
+                const when = isoDate(r.duration, x.start);
                 return { name: x.name, items: [
-                    { type: 'actie', text: `${x.name} opleveren`, when, note: `${fmt(r.effort)} dagen werk · klaar na ${fmt(r.duration)} werkdagen` },
+                    { type: 'actie', text: `${x.name} opleveren`, when, note: `${fmt(r.effort)} mensdagen werk · klaar na ${fmt(r.duration)} werkdagen` },
                     { type: 'kerncijfer', text: 'realisme.einddatum', note: when },
                     { type: 'kerncijfer', text: 'realisme.mensdagen', note: String(r.effort) },
                     { type: 'kerncijfer', text: 'realisme.doorlooptijd', note: String(r.duration) }
@@ -1836,7 +1827,7 @@ const ocExport = (() => {
         let voorbeeld = false;
         function hint(msg) { document.getElementById('calcHint').textContent = msg; }
         function showEmpty() {
-            lastCalc = null;
+            lastCalc = null; clearTimeout(liveTimer);
             document.getElementById('emptyState').style.display = 'block';
             document.getElementById('ocStartBtns').hidden = !(isEmpty(cur()) && !voorbeeld);
             document.getElementById('resultsContent').style.display = 'none';
@@ -1846,7 +1837,7 @@ const ocExport = (() => {
         function calculate(noSave) {
             if (noSave !== true) persist();
             const raw = ['optimistic', 'realistic', 'pessimistic'].map(id => document.getElementById(id).value.trim());
-            const [O, M, P] = raw.map(v => parseFloat(v.replace(',', '.')) || 0);
+            const [O, M, P] = raw.map(v => getal(v) || 0);
             const context = document.querySelector('input[name="context"]:checked').value;
             document.getElementById('vbBar').hidden = !voorbeeld;
 
@@ -1860,10 +1851,11 @@ const ocExport = (() => {
             ow.hidden = !wrong; ow.textContent = wrong ? 'Kijk de volgorde na: optimistisch is het kleinste getal, pessimistisch het grootste.' : '';
             ['optimistic', 'realistic', 'pessimistic'].forEach((id, i) => document.getElementById(id).setAttribute('aria-invalid', String(wrong && ((i === 0 && O > M) || (i === 1 && (O > M || M > P)) || (i === 2 && M > P)))));
             if (wrong) { showEmpty(); hint(''); return; }
+            const result = runSimulation(O, M, P, context, capOf(document.getElementById('capacity').value));
+            if (!(result.duration <= MAX_WERKDAGEN)) { showEmpty(); hint('Dat duurt meer dan honderd jaar. Kijk je getallen en het aantal mensen na.'); return; }
             hint('');
             document.getElementById('savedNote').hidden = voorbeeld;
 
-            const result = runSimulation(O, M, P, context, capOf(document.getElementById('capacity').value));
             const start = cleanStart(document.getElementById('startDate').value);
             lastCalc = { O, M, P, context, result, start, diagnosis: getDiagnosis(result, context, O, P) };
 
@@ -1877,11 +1869,15 @@ const ocExport = (() => {
             document.getElementById('effortDesc').textContent = result.cap === 1 ? 'Netto werktijd nodig om het project af te ronden'
                 : `Met ${fmt(result.cap)} voltijdse mensen is dat ${fmt(result.workdays)} werkdagen werk`;
             document.getElementById('factorValue').textContent = fmt(result.factor) + '×';
-            document.getElementById('factorLabel').textContent = result.factor > 1 ? 'zo veel langer door wachten en afstemmen' : 'geen extra tijd voor wachten en afstemmen';
+            document.getElementById('factorLabel').textContent = result.factor > 1 ? 'zo lang als het werk alleen, door wachten en afstemmen' : 'geen extra tijd voor wachten en afstemmen';
             document.getElementById('endDate').textContent = endSentence(result.duration, start);
             toonOpdracht(result, start);
             document.getElementById('diagnosisText').textContent = lastCalc.diagnosis;
+            // Voor wie een schermlezer gebruikt: de uitkomst één keer voorlezen als je even stopt met typen
+            if (noSave !== true) { clearTimeout(liveTimer); liveTimer = setTimeout(() => {
+                document.getElementById('resultLive').textContent = `${fmt(result.effort)} mensdagen werk, doorlooptijd ${fmt(result.duration)} werkdagen. ${endSentence(result.duration, start)}`; }, 900); }
         }
+        let liveTimer = null;
         /* Uit de Projectopdracht van hetzelfde project (dezelfde naam, soepel vergeleken): de einddatum en de inzet van mensen.
            Alleen als voorstel: de inzet komt pas in het veld als je op de knop tikt, de einddatum is een vergelijkpunt. Nooit stil overschrijven. */
         const projSleutel = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '').slice(0, 50);
@@ -1904,7 +1900,7 @@ const ocExport = (() => {
         // Werkdagen tussen twee data (zonder weekends en feestdagen), positief als b later is dan a
         function werkdagenTussen(a, b) {
             const s = a <= b ? 1 : -1, d = new Date(a); let n = 0;
-            for (let i = 0; i < 3000 && iso(d) !== iso(b); i++) { d.setDate(d.getDate() + s); if (werkdag(d)) n += s; }
+            for (let i = 0; i < 2 * MAX_WERKDAGEN && iso(d) !== iso(b); i++) { d.setDate(d.getDate() + s); if (werkdag(d)) n += s; }
             return n;
         }
         function toonOpdracht(result, start) {
@@ -1936,7 +1932,8 @@ const ocExport = (() => {
             document.getElementById('optimistic').value = o;
             document.getElementById('realistic').value = m;
             document.getElementById('pessimistic').value = p;
-            const r = document.querySelector(`input[name="context"][value="${ctx}"]`); r.checked = true;
+            if (!isContext(ctx)) ctx = 'autonomous';
+            document.querySelector(`input[name="context"][value="${ctx}"]`).checked = true;
             document.querySelectorAll('.context-option').forEach(o2 => o2.classList.toggle('selected', o2.dataset.context === ctx));
         }
         // Voorbeeld: hetzelfde project als in de andere tools, twee voltijdse mensen, beslissingen via een stuurgroep
@@ -2048,14 +2045,16 @@ const ocExport = (() => {
                 tooltip.style.left = Math.max(8, Math.min(rect.left, innerWidth - tooltip.offsetWidth - 8)) + 'px';
                 tooltip.style.top = (rect.bottom + 10) + 'px';
                 tooltip.classList.add('show');
+                element.setAttribute('aria-describedby', 'tooltip');   // ook een schermlezer leest de uitleg
             }
 
             function hideTooltip() {
                 tooltip.classList.remove('show');
+                document.querySelectorAll('[aria-describedby="tooltip"]').forEach(x => x.removeAttribute('aria-describedby'));
             }
 
             document.getElementById('schattingHelp').addEventListener('mouseenter', e => {
-                showTooltip(e.target, 'Een drie-puntenschatting helpt om met onzekerheid te schatten. Schat drie scenario\'s: het beste geval (optimistisch), het meest waarschijnlijke (realistisch) en het slechtste geval (pessimistisch). De tool rekent 2000 mogelijke verlopen door om een realistische verwachting te berekenen.');
+                showTooltip(e.target, 'Een drie-puntenschatting helpt om met onzekerheid te schatten. Schat drie scenario\'s: het beste geval (optimistisch), het meest waarschijnlijke (realistisch) en het slechtste geval (pessimistisch). De tool weegt het realistische scenario het zwaarst en neemt een marge voor tegenvallers.');
             });
             document.getElementById('schattingHelp').addEventListener('mouseleave', hideTooltip);
 

@@ -223,6 +223,13 @@
             border-bottom-color: var(--accent);
         }
 
+        .schets { margin:0.625rem 0 0.875rem; font-size:0.875rem; line-height:1.5; color:#475569; }
+        .schets b { color:#1e293b; font-weight:600; }
+        .input-item label small { display:block; margin-top:0.125rem; font-size:0.75rem; font-weight:500; letter-spacing:0; text-transform:none; color:#475569; }
+        .schat-tip { margin-top:0.75rem; font-size:0.8125rem; line-height:1.5; color:#475569; }
+        .schat-tip summary { display:inline-flex; align-items:center; min-height:44px; padding:0 0.25rem; font-weight:600; color:#047857; cursor:pointer; border-radius:8px; }
+        .schat-tip summary:focus-visible { outline:2px solid #047857; outline-offset:2px; }
+        .schat-tip p { margin:0 0 0.25rem; }
         .three-inputs {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -1160,6 +1167,21 @@ input::placeholder, textarea::placeholder { color:#64748b; opacity:1; }
 
 /* Eenheid: vaste breedte voor de inhoud onder de kop (smal 720 px of breed 1200 px) */
 .container { max-width:1200px; margin-left:auto; margin-right:auto; }
+/* oc-start-gelijk: op een gsm staan de startknoppen onder elkaar, even breed, met overal hetzelfde ritme */
+@media (max-width:640px) {
+  .oc-start-btns.oc-start-btns, .oc-start.start-card .btns { display:grid; grid-template-columns:minmax(0,17rem); justify-content:center; gap:0.625rem; margin-top:1rem; }
+  .oc-start-btns.oc-start-btns > *, .oc-start.start-card .btns > * { width:100%; min-height:48px; margin:0; justify-content:center; text-align:center; }
+  .oc-start.oc-start .oc-open-row, .oc-start.oc-start .oc-imp-rij { margin:0.375rem 0 0; padding:0; }
+  .oc-start.oc-start { gap:0; }
+  .oc-start.oc-start .oc-open-link, .oc-start.oc-start .oc-import { margin-top:0; }
+  .oc-start-btns.oc-start-btns + *, .oc-start.start-card .btns + * { margin-top:0.375rem; }
+  .oc-start > p:first-child, .oc-start > span:first-child, .oc-start > strong + p { font-size:0.9375rem; line-height:1.55; }
+  .oc-start > p:first-child, .oc-start > strong + p { margin-bottom:0; }
+  .oc-start .oc-imp-rij:not(:has(.oc-import:not([hidden]))) { display:none; }
+  .oc-start.empty, .oc-start.card, .oc-start.empty-board { padding:1.5rem 1.25rem; }
+}
+.oc-start.start-card .btns .btn-ghost { background:#ecfdf5; color:#047857; border-color:transparent; box-shadow:inset 0 0 0 1px #a7f3d0; }
+.oc-start.start-card .btns .btn-ghost:hover { background:#d1fae5; }
 </style>
 <script>
 /* oc-opslag v1 begin */
@@ -2084,14 +2106,14 @@ window.ocProjectkiezer = function (plek, o) {
     </header>
 
     <main class="container">
-        <div class="oc-start" id="ocStart" hidden><p>Vul drie schattingen in: optimistisch, realistisch en pessimistisch. De tool rekent uit hoeveel kalendertijd je project echt nodig heeft. Of bekijk eerst een voorbeeld.</p><div class="oc-start-btns"><button type="button" class="oc-btn oc-btn-primary oc-begin" id="ocBegin">Begin met je schatting</button><button type="button" class="oc-btn oc-btn-ghost" id="exampleBtn">Voorbeeld bekijken</button></div>
+        <div class="oc-start" id="ocStart" hidden><p>Wanneer is je project echt klaar? Jij schat hoeveel werk het is. De tool telt marge en wachttijd erbij en toont een eerlijke einddatum. Of bekijk eerst een voorbeeld.</p><div class="oc-start-btns"><button type="button" class="oc-btn oc-btn-primary oc-begin" id="ocBegin">Begin met je schatting</button><button type="button" class="oc-btn oc-btn-ghost" id="exampleBtn">Voorbeeld bekijken</button></div>
                         <p class="oc-open-row"><button type="button" class="oc-open-link" data-ocb="open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 16v-5M9.5 13.5 12 11l2.5 2.5"/></svg>Open bestand</button></p></div>
 
         <div class="main-grid">
             <!-- Left column -->
             <div class="left-column">
                 <div class="card card-input">
-                    <h2 class="card-title">Invoer</h2>
+                    <h2 class="card-title">Hoeveel werk is het?</h2>
                     <div class="vb-bar" id="vbBar" role="note" hidden>
                         <span class="vb-text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Dit is een voorbeeld om de tool te verkennen. Het telt niet mee in andere tools.</span></span>
                         <span class="vb-btns"><button type="button" class="vb-btn vb-wis" id="vbWis">Wis voorbeeld</button><button type="button" class="vb-btn vb-eigen" id="vbEigen">Maak er mijn eigen van</button></span>
@@ -2102,23 +2124,22 @@ window.ocProjectkiezer = function (plek, o) {
                         <div class="input-group-title">
                             <span class="help" id="schattingHelp" tabindex="0" role="button">Drie-puntenschatting</span>
                         </div>
+                        <p class="schets">Schat het werk in <b>mensdagen</b>: 1 persoon die 1 dag voluit werkt. Twee mensen die elk 3 weken werken, is samen 30 mensdagen.</p>
                         <div class="three-inputs">
                             <div class="input-item optimistic">
-                                <label for="optimistic">Optimistisch</label>
+                                <label for="optimistic">Optimistisch<small>als alles meezit</small></label>
                                 <input type="text" id="optimistic" inputmode="decimal" maxlength="9" autocomplete="off" enterkeyhint="next" placeholder="bv. 20" aria-describedby="orderWarn">
                             </div>
                             <div class="input-item realistic">
-                                <label for="realistic">Realistisch</label>
+                                <label for="realistic">Realistisch<small>wat je verwacht</small></label>
                                 <input type="text" id="realistic" inputmode="decimal" maxlength="9" autocomplete="off" enterkeyhint="next" placeholder="bv. 30" aria-describedby="orderWarn">
                             </div>
                             <div class="input-item pessimistic">
-                                <label for="pessimistic">Pessimistisch</label>
+                                <label for="pessimistic">Pessimistisch<small>als alles tegenzit</small></label>
                                 <input type="text" id="pessimistic" inputmode="decimal" maxlength="9" autocomplete="off" enterkeyhint="next" placeholder="bv. 60" aria-describedby="orderWarn">
                             </div>
                         </div>
-                        <div style="font-size: 0.75rem; color: #047857; font-weight: 500; margin-top: 0.5rem; text-align: center;">
-                            in mensdagen
-                        </div>
+                        <details class="schat-tip"><summary>Moeilijk te schatten?</summary><p>Deel het werk op in stukken, schat elk stuk en tel op. Vraag het ook aan wie het werk doet. Twijfel je sterk, zet dan optimistisch en pessimistisch ver uit elkaar: de tool rekent dan met meer marge.</p></details>
                         <p class="order-warn" id="orderWarn" role="alert" hidden></p>
                     </div>
 
@@ -2219,8 +2240,8 @@ window.ocProjectkiezer = function (plek, o) {
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M12 6v6l4 2"/>
                         </svg>
-                        <h3>Vul je schatting in</h3>
-                        <p>De tool berekent hoeveel kalendertijd je project<br>écht nodig heeft op basis van de context.</p>
+                        <h3>Hier komt je einddatum</h3>
+                        <p>Vul de drie schattingen in. Dan zie je hoeveel werk het is, hoelang het duurt en wanneer je klaar bent.</p>
                     </div>
 
                     <div id="resultsContent" style="display: none;">

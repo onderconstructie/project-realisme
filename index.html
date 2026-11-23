@@ -2216,6 +2216,7 @@ window.ocProjectkiezer = function (plek, o) {
 };
 /* oc-projectkiezer v1 einde */
 </script>
+<style id="oc-ctrlz">@media (hover:hover) and (pointer:fine){#ocToast button::after{content:" (Ctrl+Z)";font-weight:400;opacity:.8}}</style>
 </head>
 <body>
     <header class="header oc-head" data-oc-kop data-stand="compact"><script>ocKop.vooraf({ sleutel: 'realisme.v1', lijst: 'projects', leeg: u => !u.voorbeeld && !String(u.o || '').trim() && !String(u.m || '').trim() && !String(u.p || '').trim() && !String(u.cap || '').trim() && !u.start && (u.context || 'autonomous') === 'autonomous' && u.zek === undefined && u.eff === undefined && !u.vo });</script>
@@ -3004,7 +3005,7 @@ ${delen.map(p).join('\n')}
             t.querySelector('span').textContent = msg;
             t.querySelector('button').hidden = !toastUndo;
             t.classList.add('show');
-            clearTimeout(toastTimer); toastTimer = setTimeout(function ocT() { const w = window.ocWacht ? ocWacht(t) : 0; if (w) { toastTimer = setTimeout(ocT, w); return; } t.classList.remove('show'); toastUndo = null; }, toastUndo ? 6000 : 2600);
+            clearTimeout(toastTimer); toastTimer = setTimeout(function ocT() { const w = window.ocWacht ? ocWacht(t) : 0; if (w) { toastTimer = setTimeout(ocT, w); return; } t.classList.remove('show'); toastUndo = null; }, toastUndo ? 10000 : 4000);
         }
         /* Bevestiging in de pagina, in plaats van confirm() */
         function ocConfirmWipe(msg, okText) {
